@@ -24,7 +24,7 @@ estimate_coverage_func1 <- function(dat1, dat2) {
   
   cov_data[ , 17:23] <- round(cov_data[ , 17:23], digits = 2) # round cov values to 2 digits
   
-  cov_data <- cov_data[ , c(1,2,17:23)] # reintroduce # if want df only with cov values
+  cov_data <- cov_data[ -c(71,108), c(1,2,17:23)] # reintroduce # if want df only with cov values
   
   return(cov_data)
   
@@ -54,7 +54,7 @@ estimate_coverage_func2 <- function(dat1, dat2) {
   
   cov_data[ , 17:23] <- round(cov_data[ , 17:23], digits = 2) # round cov values to 2 digits
   
-  cov_data <- cov_data[ , c(1,2,17:23)] # reintroduce # if want df only with cov values
+  cov_data <- cov_data[ -c(71,108), c(1,2,17:23)] # reintroduce # if want df only with cov values
   
   return(cov_data)
   
@@ -84,7 +84,7 @@ estimate_coverage_func3 <- function(dat1, dat2) {
   
   cov_data[ , 11:17] <- round(cov_data[ , 11:17], digits = 2) # round cov values to 2 digits
   
-  cov_data <- cov_data[ , c(1,2,11:17)] # reintroduce # if want df only with cov values
+  cov_data <- cov_data[ -c(71,108), c(1,2,11:17)] # reintroduce # if want df only with cov values
   
   return(cov_data)
   
