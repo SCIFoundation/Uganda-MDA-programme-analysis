@@ -8,6 +8,14 @@ rm(list = ls())
 #       Load data files                       #
 #=============================================#
 
+#=======================#                                                                                             
+# Initiatie sub-scripts #                                                                                             
+source('libraries.R')
+source('Estimating_denominators.R')
+source('Estimating_coverages.R')
+source('Mapping_coverage.R')
+source('Produce_outputs.R')
+
 # Load data files (.csv) #
 
 total_doses <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_doses_district&year.csv") # Total PZQ doses by district/year
@@ -24,12 +32,7 @@ district_pop_year_preestimated <- read.csv("~/Uganda-MDA-programme-analysis/Data
 districts_2006 <- readShapePoly("~/Uganda-MDA-programme-analysis/Data/Uganda shape files/2006 district/UGA_district_boundaries_2006.shp") # need this for 2006
 
 
-#=======================#                                                                                             
-# Initiatie sub-scripts #                                                                                             
-source('libraries.R')
-source('Estimating_denominators.R')
-source('Estimating_coverages.R')
-source('Mapping_coverage.R')
+
 
 #======================================================#
 #==========  Denominator estimation ===================#
@@ -65,26 +68,65 @@ coverage_dataframe4 <- estimate_coverage_func3(dat1 = total_doses, dat2 = larges
 
 #======================================================#
 #=========== Plotting/ mapping coverage ===============#
+#======================================================#
 
+# ============================#
 # 1) produce base national map
 
 national_map <- Plot_nationalmap_Uganda_func()
 national_map
 
+# ====================================================================#
 # 2) overlay districts (covering 2003-2009 period) & create dataframe
 district_map_0309 <- UGA_district_boundaries_0309_function(shape_file = districts_2006, 
                                                                  national_map_input = national_map) 
 
 district_names_0309 <- district_name_func(shape_file = districts_2006) 
 
+# =========================================#
 # 3) Mapping coverage by department x years
-# 2003 maps 
-MDA_2003_dataframe <- district_MDA_coverage_mapping03_dataframe_func(data1 = coverage_dataframe1, data2 = coverage_dataframe2, 
+
+# 2003 maps #
+MDA_2003_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = coverage_dataframe1, data2 = coverage_dataframe2, 
                                                                      data3 = coverage_dataframe3, data4 = coverage_dataframe4, 
                                                                      district_names_0309 = district_names_0309,
-                                                                     district_map_0309 = district_map_0309)
+                                                                     district_map_0309 = district_map_0309,
+                                                                     year_input = 2003)
 
-MDA_2003_maps <- plot_UGA_2003_MDA_func(national_map = national_map, MDA_data_03 = MDA_2003_dataframe)
+MDA_2003_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2003_dataframe)
 MDA_2003_maps
 
-# 2004
+# 2004 #
+MDA_2004_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = coverage_dataframe1, data2 = coverage_dataframe2, 
+                                                                       data3 = coverage_dataframe3, data4 = coverage_dataframe4, 
+                                                                       district_names_0309 = district_names_0309,
+                                                                       district_map_0309 = district_map_0309,
+                                                                       year_input = 2004)
+
+MDA_2004_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2004_dataframe)
+MDA_2004_maps
+
+# 2005 #
+MDA_2005_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = coverage_dataframe1, data2 = coverage_dataframe2, 
+                                                                       data3 = coverage_dataframe3, data4 = coverage_dataframe4, 
+                                                                       district_names_0309 = district_names_0309,
+                                                                       district_map_0309 = district_map_0309,
+                                                                       year_input = 2005)
+
+MDA_2005_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2005_dataframe)
+MDA_2005_maps # two dark grey districts (alpha should be set to 0.01 but not doing this?)
+
+# 2006 #
+MDA_2006_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = coverage_dataframe1, data2 = coverage_dataframe2, 
+                                                                       data3 = coverage_dataframe3, data4 = coverage_dataframe4, 
+                                                                       district_names_0309 = district_names_0309,
+                                                                       district_map_0309 = district_map_0309,
+                                                                       year_input = 2006)
+
+MDA_2006_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2006_dataframe)
+MDA_2006_maps #
+
+#=========================#
+#       Print output      #
+
+print_PDF_Cov_maps(map1 = MDA_2003_maps, map2 = MDA_2004_maps, map3 = MDA_2005_maps, map4 = MDA_2006_maps)

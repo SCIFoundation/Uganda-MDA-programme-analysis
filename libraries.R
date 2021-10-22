@@ -10,6 +10,7 @@ library(broom)
 #    Plotting          #
 
 library(ggplot2)
+library(gridExtra)  # Load some extensions to have multiplot pdf
 
 
 #=====================#

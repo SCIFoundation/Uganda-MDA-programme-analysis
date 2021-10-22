@@ -62,8 +62,9 @@ district_name_func <- function(shape_file = districts_2006){
 
 
 
-district_MDA_coverage_mapping03_dataframe_func <- function(data1, data2, data3, data4, 
-                                                           district_names_0309, district_map_0309){
+district_MDA_coverage_mapping0309_dataframe_func <- function(data1, data2, data3, data4, 
+                                                           district_names_0309, district_map_0309,
+                                                           year_input){
   
 
 # rename district names within coverage dataframes (to match shp dataframe object) #
@@ -118,35 +119,44 @@ data3$District_factor <- District_factor_col$District_factor
 data4$District_factor <- District_factor_col$District_factor
 
 
-#=========================================================#
-#   Mapping Presence of MDA: 2003 treatment year          #
+#==============================================================#
+#   Mapping Presence of MDA: 2003-2009 treatment year          #
 
-MDA_03 <- c("APAC","MOYO","ADJUMANI","ARUA","NEBBI","LIRA","NAKASONGOLA","MASINDI","HOIMA",
-            "BUGIRI", "BUSIA", "KAYUNGA", "JINJA", "MUKONO", "WAKISO", "MAYUGE", "BUNDIBUGYO",
-            "KIBAALE") # vector of districts with MDA in 2003
 
-length(MDA_03)
+if(year_input == 2003 || year_input == 2004){
 
-UGA_dist_MDA_names_03 <- district_names_0309 # copy variable (dist names)
+  MDA_districts <- c("APAC","MOYO","ADJUMANI","ARUA","NEBBI","LIRA","NAKASONGOLA","MASINDI","HOIMA",
+            "BUGIRI", "BUSIA", "KAYUNGA", "JINJA", "MUKONO", "WAKISO", "MAYUGE", "BUNDIBUGYO","KIBAALE") # vector of districts with MDA in 2003
+  } 
+if(year_input == 2005 || year_input == 2006) {
 
-UGA_dist_MDA_names_03$MDA <- ifelse(district_names_0309$Dist_name %in% MDA_03, "MDA","none") # code whether MDA or not
+    MDA_districts <- c("APAC","MOYO","ADJUMANI","YUMBE","ARUA","NEBBI","LIRA","KABERAMAIDO","SOROTI","NAKASONGOLA",
+                  "MASINDI","HOIMA","KAMULI","BUGIRI", "BUSIA", "KAYUNGA", "JINJA", "MUKONO", "WAKISO", "MAYUGE",
+                  "KALANGALA","KABALE","KISORO","KANUNGU","RUKUNGIRI","BUNDIBUGYO","KIBAALE")
+    } 
 
-UGA_dist_MDA_names_03 <- UGA_dist_MDA_names_03  %>% rename(dname_2006 = Dist_name) # rename column
+length(MDA_districts)
 
-UGA_districts_tidy_03 <- left_join(district_map_0309, UGA_dist_MDA_names_03) # join boundary data to MDA presence data
+UGA_dist_MDA_names <- district_names_0309 # copy variable (dist names)
 
-UGA_districts_tidy_03$MDA <- as.factor(UGA_districts_tidy_03$MDA) # make MDA presence a factor
+UGA_dist_MDA_names$MDA <- ifelse(district_names_0309$Dist_name %in% MDA_districts, "MDA","none") # code whether MDA or not
+
+UGA_dist_MDA_names <- UGA_dist_MDA_names  %>% rename(dname_2006 = Dist_name) # rename column
+
+UGA_districts_tidy <- left_join(district_map_0309, UGA_dist_MDA_names) # join boundary data to MDA presence data
+
+UGA_districts_tidy$MDA <- as.factor(UGA_districts_tidy$MDA) # make MDA presence a factor
 
 MDA.col <- c("purple2","lightgrey") # to colour MDA districts
-MDA.vec <- MDA.col[UGA_districts_tidy_03$MDA] # specify colour for each polygon
+MDA.vec <- MDA.col[UGA_districts_tidy$MDA] # specify colour for each polygon
 
-UGA_districts_tidy_03$MDA_fill <- MDA.vec # new column for fill in ggplot depending on MDA
+UGA_districts_tidy$MDA_fill <- MDA.vec # new column for fill in ggplot depending on MDA
 
 alpha.MDA.col <- c(0.6, 0.01) # alpha for gpplot depending on MDA fill
 
-alpha.MDA.vec <- alpha.MDA.col[UGA_districts_tidy_03$MDA] # vector depending on MDA
+alpha.MDA.vec <- alpha.MDA.col[UGA_districts_tidy$MDA] # vector depending on MDA
 
-UGA_districts_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+UGA_districts_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
 
 # to plot: # 
 
@@ -167,7 +177,7 @@ UGA_districts_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based for alph
 #   guides(fill=guide_legend(override.aes=list(shape=21, size=3, colour="black", stroke=1.2))) # need this to get colour in the fill (sample.size) legend
 
 #=========================================================#
-#           Coverage of MDA: 2003 treatment year          #
+#           Coverage of MDA: 2003-2009 treatment year          #
 
 District_name0309_vec <-  c('ABIM', 'ADJUMANI', 'AGAGO', 'AMOLATAR', 'AMUDAT', 'AMURIA', 'AMURU', 'APAC', 'ARUA',
                             'BUDAKA', 'BUDUDA', 'BUGIRI', 'BUKEDEA', 'BUKWO', 'BULIISA', 'BUNDIBUGYO', 'BUSHENYI', 'BUSIA',
@@ -182,27 +192,43 @@ District_name0309_vec <-  c('ABIM', 'ADJUMANI', 'AGAGO', 'AMOLATAR', 'AMUDAT', '
 
 #===== Coverage 1 (total doses/toal targeted)==============#
 
-dummy_dataset_2003a <- data1
+dummy_dataset1 <- data1
 
-dummy_dataset_2003a <- filter(dummy_dataset_2003a, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
+dummy_dataset1 <- filter(dummy_dataset1, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
 
-UGA_dist_MDAcov1_names_03 <- UGA_dist_MDA_names_03 %>% distinct() # remove districts not available in 2003
+UGA_dist_MDAcov1_names <- UGA_dist_MDA_names %>% distinct() # remove districts not available in 2003
 
-UGA_dist_MDAcov1_names_03$MDA_cov <- dummy_dataset_2003a$Cov_2003 # add coverage values to dataframe for mapping
+if(year_input == 2003 ){
+  UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2003 # add coverage values to dataframe for mapping
+  UGA_dist_MDAcov1_names$MDA_year <- as.factor("2003")
+  }
+if(year_input == 2004 ){
+    UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2004
+    UGA_dist_MDAcov1_names$MDA_year <- as.factor("2004")
+    }
+if(year_input == 2005 ){
+      UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2005
+      UGA_dist_MDAcov1_names$MDA_year <- as.factor("2005")
+      } 
+if(year_input == 2006 ){
+      UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2006
+      UGA_dist_MDAcov1_names$MDA_year <- as.factor("2006")
+      }
 
-UGA_districts_MDAcov1_tidy_03 <- left_join(district_map_0309, UGA_dist_MDAcov1_names_03) # join boundary data to MDA presence data
 
-UGA_districts_MDAcov1_tidy_03$MDA_cov <- as.numeric(UGA_districts_MDAcov1_tidy_03$MDA_cov) # make cov value a numeric variable
+UGA_districts_MDAcov1_tidy <- left_join(district_map_0309, UGA_dist_MDAcov1_names) # join boundary data to MDA presence data
 
-UGA_districts_MDAcov1_tidy_03$MDA <- as.factor(UGA_districts_MDAcov1_tidy_03$MDA) # make MDA presence a factor
+UGA_districts_MDAcov1_tidy$MDA_cov <- as.numeric(UGA_districts_MDAcov1_tidy$MDA_cov) # make cov value a numeric variable
 
-UGA_districts_MDAcov1_tidy_03$Coverage_approach <- as.factor("denominator: total targeted")
+UGA_districts_MDAcov1_tidy$MDA <- as.factor(UGA_districts_MDAcov1_tidy$MDA) # make MDA presence a factor
+
+UGA_districts_MDAcov1_tidy$Coverage_approach <- as.factor("denominator: total targeted")
 
 alpha.MDA.col <- c(0.9, 0.01) # alpha for gpplot depending on MDA fill
 
-alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov1_tidy_03$MDA] # vector depending on MDA
+alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov1_tidy$MDA] # vector depending on MDA
 
-UGA_districts_MDAcov1_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+UGA_districts_MDAcov1_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
 
 # to plot
 
@@ -220,25 +246,42 @@ UGA_districts_MDAcov1_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based 
 
 
 #===== Coverage 2 (total doses/district pop)==============#
-dummy_dataset_2003b <- data2
+dummy_dataset2 <- data2
 
-dummy_dataset_2003b <- filter(dummy_dataset_2003b, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
+dummy_dataset2 <- filter(dummy_dataset2, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
 
-UGA_dist_MDAcov2_names_03 <- UGA_dist_MDA_names_03 %>% distinct() # remove districts not available in 2003
+UGA_dist_MDAcov2_names <- UGA_dist_MDA_names %>% distinct() # remove districts not available in 2003
 
-UGA_dist_MDAcov2_names_03$MDA_cov <- dummy_dataset_2003b$Cov_2003 # add coverage values to dataframe for mapping
+if(year_input == 2003 ){
+  UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2003 # add coverage values to dataframe for mapping
+  UGA_dist_MDAcov2_names$MDA_year <- as.factor("2003")
+  }
+if(year_input == 2004 ){
+    UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2004
+    UGA_dist_MDAcov2_names$MDA_year <- as.factor("2004")
+    }
+if(year_input == 2005 ){
+      UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2005
+      UGA_dist_MDAcov2_names$MDA_year <- as.factor("2005")
+    }
+if(year_input == 2006 ){
+  UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2006
+  UGA_dist_MDAcov2_names$MDA_year <- as.factor("2006")
+}
 
-UGA_districts_MDAcov2_tidy_03 <- left_join(district_map_0309, UGA_dist_MDAcov2_names_03) # join boundary data to MDA presence data
+# UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2003 # add coverage values to dataframe for mapping
 
-UGA_districts_MDAcov2_tidy_03$MDA_cov <- as.numeric(UGA_districts_MDAcov2_tidy_03$MDA_cov) # make cov value a numeric variable
+UGA_districts_MDAcov2_tidy <- left_join(district_map_0309, UGA_dist_MDAcov2_names) # join boundary data to MDA presence data
 
-UGA_districts_MDAcov2_tidy_03$MDA <- as.factor(UGA_districts_MDAcov2_tidy_03$MDA) # make MDA presence a factor
+UGA_districts_MDAcov2_tidy$MDA_cov <- as.numeric(UGA_districts_MDAcov2_tidy$MDA_cov) # make cov value a numeric variable
 
-UGA_districts_MDAcov2_tidy_03$Coverage_approach <- as.factor("denominator: district population (constant growth)")
+UGA_districts_MDAcov2_tidy$MDA <- as.factor(UGA_districts_MDAcov2_tidy$MDA) # make MDA presence a factor
 
-alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov2_tidy_03$MDA] # vector depending on MDA
+UGA_districts_MDAcov2_tidy$Coverage_approach <- as.factor("denominator: district population (constant growth)")
 
-UGA_districts_MDAcov2_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov2_tidy$MDA] # vector depending on MDA
+
+UGA_districts_MDAcov2_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
 
 # Map_03_MDAcov2 <-
 #   ggplot() +
@@ -254,26 +297,43 @@ UGA_districts_MDAcov2_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based 
 
 #===== Coverage 3 (total doses/district pop - using SCIF data & pop growth )==============#
 
-dummy_dataset_2003c <- data3
+dummy_dataset3 <- data3
 
-dummy_dataset_2003c <- filter(dummy_dataset_2003c, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
+dummy_dataset3 <- filter(dummy_dataset3, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
 
-UGA_dist_MDAcov3_names_03 <- UGA_dist_MDA_names_03 %>% distinct() # remove districts not available in 2003
+UGA_dist_MDAcov3_names <- UGA_dist_MDA_names %>% distinct() # remove districts not available in 2003
 
-UGA_dist_MDAcov3_names_03$MDA_cov <- dummy_dataset_2003c$Cov_2003 # add coverage values to dataframe for mapping
+if(year_input == 2003 ){
+  UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2003 # add coverage values to dataframe for mapping
+  UGA_dist_MDAcov3_names$MDA_year <- as.factor("2003")
+  }
+if(year_input == 2004 ){
+    UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2004
+    UGA_dist_MDAcov3_names$MDA_year <- as.factor("2004")
+    }
+if(year_input == 2005 ){
+      UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2005
+      UGA_dist_MDAcov3_names$MDA_year <- as.factor("2005")
+      }
+if(year_input == 2006 ){
+  UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2006
+  UGA_dist_MDAcov3_names$MDA_year <- as.factor("2006")
+}
 
-UGA_districts_MDAcov3_tidy_03 <- left_join(district_map_0309, UGA_dist_MDAcov3_names_03) # join boundary data to MDA presence data
+#UGA_dist_MDAcov3_names_03$MDA_cov <- dummy_dataset_2003c$Cov_2003 # add coverage values to dataframe for mapping
 
-UGA_districts_MDAcov3_tidy_03$MDA_cov <- as.numeric(UGA_districts_MDAcov3_tidy_03$MDA_cov) # make cov value a numeric variable
+UGA_districts_MDAcov3_tidy <- left_join(district_map_0309, UGA_dist_MDAcov3_names) # join boundary data to MDA presence data
 
-UGA_districts_MDAcov3_tidy_03$MDA <- as.factor(UGA_districts_MDAcov3_tidy_03$MDA) # make MDA presence a factor
+UGA_districts_MDAcov3_tidy$MDA_cov <- as.numeric(UGA_districts_MDAcov3_tidy$MDA_cov) # make cov value a numeric variable
 
-UGA_districts_MDAcov3_tidy_03$Coverage_approach <- as.factor("denominator: district population (SCIF numbers
+UGA_districts_MDAcov3_tidy$MDA <- as.factor(UGA_districts_MDAcov3_tidy$MDA) # make MDA presence a factor
+
+UGA_districts_MDAcov3_tidy$Coverage_approach <- as.factor("denominator: district population (SCIF numbers
 & constant growth)")
 
-alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov3_tidy_03$MDA] # vector depending on MDA
+alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov3_tidy$MDA] # vector depending on MDA
 
-UGA_districts_MDAcov3_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+UGA_districts_MDAcov3_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
 
 # Map_03_MDAcov3 <-
 #   ggplot() +
@@ -289,25 +349,42 @@ UGA_districts_MDAcov3_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based 
 
 
 #===== Coverage 4 (total doses/largest targeted pop across years)==============#
-dummy_dataset_2003d <- data4
+dummy_dataset4 <- data4
 
-dummy_dataset_2003d <- filter(dummy_dataset_2003d, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
+dummy_dataset4 <- filter(dummy_dataset4, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
 
-UGA_dist_MDAcov4_names_03 <- UGA_dist_MDA_names_03 %>% distinct() # remove districts not available in 2003
+UGA_dist_MDAcov4_names <- UGA_dist_MDA_names %>% distinct() # remove districts not available in 2003
 
-UGA_dist_MDAcov4_names_03$MDA_cov <- dummy_dataset_2003d$Cov_2003 # add coverage values to dataframe for mapping
+if(year_input == 2003 ){
+  UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2003 # add coverage values to dataframe for mapping
+  UGA_dist_MDAcov4_names$MDA_year <- as.factor("2003")
+  }
+if(year_input == 2004 ){
+    UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2004
+    UGA_dist_MDAcov4_names$MDA_year <- as.factor("2004")
+    }
+if(year_input == 2005 ){
+      UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2005
+      UGA_dist_MDAcov4_names$MDA_year <- as.factor("2005")
+      }
+if(year_input == 2006 ){
+  UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2006
+  UGA_dist_MDAcov4_names$MDA_year <- as.factor("2006")
+}
 
-UGA_districts_MDAcov4_tidy_03 <- left_join(district_map_0309, UGA_dist_MDAcov4_names_03) # join boundary data to MDA presence data
+#UGA_dist_MDAcov4_names_03$MDA_cov <- dummy_dataset_2003d$Cov_2003 # add coverage values to dataframe for mapping
 
-UGA_districts_MDAcov4_tidy_03$MDA_cov <- as.numeric(UGA_districts_MDAcov4_tidy_03$MDA_cov) # make cov value a numeric variable
+UGA_districts_MDAcov4_tidy <- left_join(district_map_0309, UGA_dist_MDAcov4_names) # join boundary data to MDA presence data
 
-UGA_districts_MDAcov4_tidy_03$MDA <- as.factor(UGA_districts_MDAcov4_tidy_03$MDA) # make MDA presence a factor
+UGA_districts_MDAcov4_tidy$MDA_cov <- as.numeric(UGA_districts_MDAcov4_tidy$MDA_cov) # make cov value a numeric variable
 
-UGA_districts_MDAcov4_tidy_03$Coverage_approach <- as.factor("denominator: largest targeted pop (across years)")
+UGA_districts_MDAcov4_tidy$MDA <- as.factor(UGA_districts_MDAcov4_tidy$MDA) # make MDA presence a factor
 
-alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov4_tidy_03$MDA] # vector depending on MDA
+UGA_districts_MDAcov4_tidy$Coverage_approach <- as.factor("denominator: largest targeted pop (across years)")
 
-UGA_districts_MDAcov4_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov4_tidy$MDA] # vector depending on MDA
+
+UGA_districts_MDAcov4_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
 
 # Map_03_MDAcov4 <-
 #   ggplot() +
@@ -326,24 +403,26 @@ UGA_districts_MDAcov4_tidy_03$alpha.MDA.vec <- alpha.MDA.vec # new column based 
 # Combined & plot different coverages                  #
 
 
-# 2003 MDA # 
-UGA_districts_MDAcov_tidy_03 <- rbind(UGA_districts_MDAcov1_tidy_03, UGA_districts_MDAcov2_tidy_03,
-                                      UGA_districts_MDAcov3_tidy_03, UGA_districts_MDAcov4_tidy_03)
+# 2003-2009 MDA # 
+UGA_districts_MDAcov_tidy <- rbind(UGA_districts_MDAcov1_tidy, UGA_districts_MDAcov2_tidy,
+                                      UGA_districts_MDAcov3_tidy, UGA_districts_MDAcov4_tidy)
 
 
-return(UGA_districts_MDAcov_tidy_03)
+return(UGA_districts_MDAcov_tidy)
 
 }
 
 
-plot_UGA_2003_MDA_func <- function(national_map, MDA_data_03){
+plot_UGA_MDA_func <- function(national_map, MDA_data){
   
-  Map_03_MDAcov <-
+  MDA_year_label <- as.character(unique(MDA_data$MDA_year)) # get year for plot title
+  
+  Map_0309_MDAcov <-
     ggplot() +
     geom_polygon(data = national_map, aes(x=long, y = lat, group = group), color = "black", size = 0.1, fill = "lightgrey") +
-    geom_polygon(data= MDA_data_03, aes(x = long, y = lat, group = group, fill=MDA_cov, alpha = alpha.MDA.vec), colour="black", size = 0.1)+
+    geom_polygon(data= MDA_data, aes(x = long, y = lat, group = group, fill=MDA_cov, alpha = alpha.MDA.vec), colour="black", size = 0.1)+
     coord_equal()+
-    labs(title="2003")+
+    labs(title=MDA_year_label)+
     facet_wrap(~Coverage_approach)+
     theme_void()+
     scale_fill_continuous(name = "MDA Coverage (%)", type = "viridis")+
@@ -351,7 +430,7 @@ plot_UGA_2003_MDA_func <- function(national_map, MDA_data_03){
     theme(
     plot.title = element_text(color="black", size=16, face="bold.italic"))
 
-return(Map_03_MDAcov)
+return(Map_0309_MDAcov)
 
 }
 
