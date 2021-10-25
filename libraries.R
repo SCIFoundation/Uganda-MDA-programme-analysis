@@ -5,13 +5,14 @@
 library(dplyr)
 library(hablar)
 library(broom)
+library(sqldf) # matching cols and inputting cov value
 
 #======================#
 #    Plotting          #
 
 library(ggplot2)
-library(gridExtra)  # Load some extensions to have multiplot pdf
-
+#library(gridExtra)  # Load some extensions to have multiplot pdf
+library(ggpubr) # Load some extensions to have multiplot pdf
 
 #=====================#
 #    Mapping          #

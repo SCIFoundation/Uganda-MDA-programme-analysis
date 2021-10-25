@@ -105,7 +105,7 @@ District_factor_col <- District_factor_col %>%
                              'Namutumba' = 'NAMUTUMBA', 'Napak' = 'NAPAK', 'Nebbi' = 'NEBBI', 'Ntungamo' = 'NTUNGAMO',
                              'Nwoya (from Amuru)' = 'NWOYA', 'Oyam' = 'OYAM', 'Pader' = 'PADER', 'Pallisa ' = 'PALLISA',
                              'Rakai' = 'RAKAI', 'Rukungiri' = 'RUKUNGIRI', 'Sironko' = 'SIRONKO', 'Soroti' = 'SOROTI',
-                             'Sembabule'='SSEMBABULE','Tororo' = 'TORORO',
+                             'SSembabule'='SSEMBABULE','Tororo' = 'TORORO',
                              'Wakiso' = 'WAKISO','Yumbe' = 'YUMBE'))
 
 # levels(District_factor_col$District_factor) # check
@@ -198,6 +198,10 @@ dummy_dataset1 <- filter(dummy_dataset1, District_factor %in% District_name0309_
 
 UGA_dist_MDAcov1_names <- UGA_dist_MDA_names %>% distinct() # remove districts not available in 2003
 
+UGA_dist_MDAcov1_names$dname_2006_chr <- as.character(UGA_dist_MDAcov1_names$dname_2006)
+
+UGA_dist_MDAcov1_names <- UGA_dist_MDAcov1_names[order(UGA_dist_MDAcov1_names$dname_2006_chr),] # TO DO (this is a quick fix): to get this dataframe districts to align with dummy dataset district order 
+
 if(year_input == 2003 ){
   UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2003 # add coverage values to dataframe for mapping
   UGA_dist_MDAcov1_names$MDA_year <- as.factor("2003")
@@ -252,6 +256,11 @@ dummy_dataset2 <- filter(dummy_dataset2, District_factor %in% District_name0309_
 
 UGA_dist_MDAcov2_names <- UGA_dist_MDA_names %>% distinct() # remove districts not available in 2003
 
+UGA_dist_MDAcov2_names$dname_2006_chr <- as.character(UGA_dist_MDAcov2_names$dname_2006)
+
+UGA_dist_MDAcov2_names <- UGA_dist_MDAcov2_names[order(UGA_dist_MDAcov2_names$dname_2006_chr),] # TO DO (this is a quick fix): to get this dataframe districts to align with dummy dataset district order 
+
+
 if(year_input == 2003 ){
   UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2003 # add coverage values to dataframe for mapping
   UGA_dist_MDAcov2_names$MDA_year <- as.factor("2003")
@@ -302,6 +311,11 @@ dummy_dataset3 <- data3
 dummy_dataset3 <- filter(dummy_dataset3, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
 
 UGA_dist_MDAcov3_names <- UGA_dist_MDA_names %>% distinct() # remove districts not available in 2003
+
+UGA_dist_MDAcov3_names$dname_2006_chr <- as.character(UGA_dist_MDAcov3_names$dname_2006)
+
+UGA_dist_MDAcov3_names <- UGA_dist_MDAcov3_names[order(UGA_dist_MDAcov3_names$dname_2006_chr),] # TO DO (this is a quick fix): to get this dataframe districts to align with dummy dataset district order 
+
 
 if(year_input == 2003 ){
   UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2003 # add coverage values to dataframe for mapping
@@ -354,6 +368,11 @@ dummy_dataset4 <- data4
 dummy_dataset4 <- filter(dummy_dataset4, District_factor %in% District_name0309_vec) # filter so any renamed districts incldued
 
 UGA_dist_MDAcov4_names <- UGA_dist_MDA_names %>% distinct() # remove districts not available in 2003
+
+UGA_dist_MDAcov4_names$dname_2006_chr <- as.character(UGA_dist_MDAcov4_names$dname_2006)
+
+UGA_dist_MDAcov4_names <- UGA_dist_MDAcov4_names[order(UGA_dist_MDAcov4_names$dname_2006_chr),] # TO DO (this is a quick fix): to get this dataframe districts to align with dummy dataset district order 
+
 
 if(year_input == 2003 ){
   UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2003 # add coverage values to dataframe for mapping
