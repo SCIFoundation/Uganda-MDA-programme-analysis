@@ -126,7 +126,39 @@ MDA_2006_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = c
 MDA_2006_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2006_dataframe)
 MDA_2006_maps #
 
+# 2007 #
+MDA_2007_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = coverage_dataframe1, data2 = coverage_dataframe2, 
+                                                                       data3 = coverage_dataframe3, data4 = coverage_dataframe4, 
+                                                                       district_names_0309 = district_names_0309,
+                                                                       district_map_0309 = district_map_0309,
+                                                                       year_input = 2007)
+
+MDA_2007_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2007_dataframe)
+MDA_2007_maps #
+
+# 2008 #
+MDA_2008_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = coverage_dataframe1, data2 = coverage_dataframe2, 
+                                                                       data3 = coverage_dataframe3, data4 = coverage_dataframe4, 
+                                                                       district_names_0309 = district_names_0309,
+                                                                       district_map_0309 = district_map_0309,
+                                                                       year_input = 2008)
+
+MDA_2008_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2008_dataframe)
+MDA_2008_maps #
+
+# 2009 #
+MDA_2009_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = coverage_dataframe1, data2 = coverage_dataframe2, 
+                                                                       data3 = coverage_dataframe3, data4 = coverage_dataframe4, 
+                                                                       district_names_0309 = district_names_0309,
+                                                                       district_map_0309 = district_map_0309,
+                                                                       year_input = 2009)
+
+MDA_2009_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2009_dataframe)
+MDA_2009_maps #
+
+
 #=========================#
 #       Print output      #
 
-print_PDF_Cov_maps(map1 = MDA_2003_maps, map2 = MDA_2004_maps, map3 = MDA_2005_maps, map4 = MDA_2006_maps)
+print_PDF_Cov_maps(map1 = MDA_2003_maps, map2 = MDA_2004_maps, map3 = MDA_2005_maps, map4 = MDA_2006_maps,
+                   map5 = MDA_2007_maps, map6 = MDA_2008_maps, map7 = MDA_2009_maps)

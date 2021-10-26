@@ -5,9 +5,9 @@
 
 
 
-print_PDF_Cov_maps <- function(map1, map2, map3, map4){
+print_PDF_Cov_maps <- function(map1, map2, map3, map4, map5, map6, map7){
   
-  multi.page <- ggarrange(map1, map2, map3, map4, nrow=1, ncol=1) # for one plot per page - need ggarrange package
+  multi.page <- ggarrange(map1, map2, map3, map4, map5, map6, map7, nrow=1, ncol=1) # for one plot per page - need ggarrange package
   
   multi.page[[1]] # for seeing the first plot
   

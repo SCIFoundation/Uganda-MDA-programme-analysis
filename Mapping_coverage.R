@@ -122,18 +122,220 @@ data4$District_factor <- District_factor_col$District_factor
 #==============================================================#
 #   Mapping Presence of MDA: 2003-2009 treatment year          #
 
+selecting_MDA_districts_func <- function(year_input) {
+  if (year_input == 2003 || year_input == 2004) {
+    MDA_districts <-
+      c(
+        "APAC",
+        "MOYO",
+        "ADJUMANI",
+        "ARUA",
+        "NEBBI",
+        "LIRA",
+        "NAKASONGOLA",
+        "MASINDI",
+        "HOIMA",
+        "BUGIRI",
+        "BUSIA",
+        "KAYUNGA",
+        "JINJA",
+        "MUKONO",
+        "WAKISO",
+        "MAYUGE",
+        "BUNDIBUGYO",
+        "KIBAALE"
+      ) # vector of districts with MDA in 2003
+  }
+  if (year_input == 2005 || year_input == 2006) {
+    MDA_districts <-
+      c(
+        "APAC",
+        "MOYO",
+        "ADJUMANI",
+        "YUMBE",
+        "ARUA",
+        "NEBBI",
+        "LIRA",
+        "KABERAMAIDO",
+        "SOROTI",
+        "NAKASONGOLA",
+        "MASINDI",
+        "HOIMA",
+        "KAMULI",
+        "BUGIRI",
+        "BUSIA",
+        "KAYUNGA",
+        "JINJA",
+        "MUKONO",
+        "WAKISO",
+        "MAYUGE",
+        "KALANGALA",
+        "KABALE",
+        "KISORO",
+        "KANUNGU",
+        "RUKUNGIRI",
+        "BUNDIBUGYO",
+        "KIBAALE"
+      )
+  }
+  if (year_input == 2005 || year_input == 2006) {
+    MDA_districts <-
+      c(
+        "APAC",
+        "MOYO",
+        "ADJUMANI",
+        "YUMBE",
+        "ARUA",
+        "NEBBI",
+        "LIRA",
+        "KABERAMAIDO",
+        "SOROTI",
+        "NAKASONGOLA",
+        "MASINDI",
+        "HOIMA",
+        "KAMULI",
+        "BUGIRI",
+        "BUSIA",
+        "KAYUNGA",
+        "JINJA",
+        "MUKONO",
+        "WAKISO",
+        "MAYUGE",
+        "KALANGALA",
+        "KABALE",
+        "KISORO",
+        "KANUNGU",
+        "RUKUNGIRI",
+        "BUNDIBUGYO",
+        "KIBAALE"
+      )
+  }
+  if (year_input == 2007) {
+    MDA_districts <-
+      c(
+        "APAC",
+        "MOYO",
+        "ADJUMANI",
+        "MARACHA (NYADRI)",
+        "ARUA",
+        "NEBBI",
+        "LIRA",
+        "KABERAMAIDO",
+        "SOROTI",
+        "AMOLATAR",
+        "NAKASONGOLA",
+        "DOKOLO",
+        "BULISA",
+        "HOIMA",
+        "BUGIRI",
+        "BUSIA",
+        "KAYUNGA",
+        "JINJA",
+        "MUKONO",
+        "WAKISO",
+        "MAYUGE",
+        "KALANGALA",
+        "MPIGI",
+        "MASAKA",
+        "KABAROLE",
+        "BUNDIBUGYO",
+        "KIBAALE"
+      )
+  }
+  if (year_input == 2008) {
+    MDA_districts <-
+      c(
+        "APAC",
+        "KOLE",
+        "YUMBE",
+        "KOBOKO",
+        "MARACHA",
+        "ARUA",
+        "NEBBI",
+        "LIRA",
+        "ALBETONG",
+        "OTUKE",
+        "OYAM",
+        "KABERAMAIDO",
+        "SOROTI",
+        "AMOLATAR",
+        "NAKASONGOLA",
+        "DOKOLO",
+        "BULIISA",
+        "HOIMA",
+        "KAMULI",
+        "BUGIRI",
+        "KALIRO",
+        "KAYUNGA",
+        "JINJA",
+        "MUKONO",
+        "WAKISO",
+        "MITYANA",
+        "MAYUGE",
+        "KALANGALA",
+        "MPIGI",
+        "GOMBA",
+        "MASAKA",
+        "RAKAI",
+        "SSEMBABULE",
+        "MUBENDE",
+        "KIBAALE"
+      )
+  }
+  if (year_input == 2009) {
+    MDA_districts <-
+      c(
+        "PADER",
+        "AGAGO",
+        "LAMWO",
+        "APAC",
+        "KOLE",
+        "KITGUM",
+        "MOYO",
+        "ADJUMANI",
+        "YUMBE",
+        "KOBOKO",
+        "MARACHA",
+        "ARUA",
+        "NEBBI",
+        "GULU",
+        "LIRA",
+        "ALEBTONG",
+        "OTUKE",
+        "OYAM",
+        "KABERAMAIDO",
+        "SERERE",
+        "NAKASONGOLA",
+        "DOKOLO",
+        "KIRYANDONGO",
+        "BULIISA",
+        "HOIMA",
+        "BUYENDE",
+        "BUGIRI",
+        "BUSIA",
+        "KAYUNGA",
+        "JINJA",
+        "MUKONO",
+        "WAKISO",
+        "MITYANA",
+        "MAYUGE",
+        "KALANGALA",
+        "MPIGI",
+        "GOMBA",
+        "MASAKA",
+        "KABALE",
+        "KABAROLE",
+        "MUBENDE",
+        "BUNDIBUGYO",
+        "NTOROKO",
+        "KIBAALE"
+      )
+  }
+  
+  return(MDA_districts)
+}
 
-if(year_input == 2003 || year_input == 2004){
-
-  MDA_districts <- c("APAC","MOYO","ADJUMANI","ARUA","NEBBI","LIRA","NAKASONGOLA","MASINDI","HOIMA",
-            "BUGIRI", "BUSIA", "KAYUNGA", "JINJA", "MUKONO", "WAKISO", "MAYUGE", "BUNDIBUGYO","KIBAALE") # vector of districts with MDA in 2003
-  } 
-if(year_input == 2005 || year_input == 2006) {
-
-    MDA_districts <- c("APAC","MOYO","ADJUMANI","YUMBE","ARUA","NEBBI","LIRA","KABERAMAIDO","SOROTI","NAKASONGOLA",
-                  "MASINDI","HOIMA","KAMULI","BUGIRI", "BUSIA", "KAYUNGA", "JINJA", "MUKONO", "WAKISO", "MAYUGE",
-                  "KALANGALA","KABALE","KISORO","KANUNGU","RUKUNGIRI","BUNDIBUGYO","KIBAALE")
-    } 
+MDA_districts <- selecting_MDA_districts_func(year_input = year_input) # call function
 
 length(MDA_districts)
 
@@ -202,23 +404,48 @@ UGA_dist_MDAcov1_names$dname_2006_chr <- as.character(UGA_dist_MDAcov1_names$dna
 
 UGA_dist_MDAcov1_names <- UGA_dist_MDAcov1_names[order(UGA_dist_MDAcov1_names$dname_2006_chr),] # TO DO (this is a quick fix): to get this dataframe districts to align with dummy dataset district order 
 
-if(year_input == 2003 ){
-  UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2003 # add coverage values to dataframe for mapping
-  UGA_dist_MDAcov1_names$MDA_year <- as.factor("2003")
-  }
-if(year_input == 2004 ){
-    UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2004
-    UGA_dist_MDAcov1_names$MDA_year <- as.factor("2004")
+make_cov_byyear_func1 <-
+  function (year_input,
+            UGA_dist_MDAcov1_names,
+            dummy_dataset1) {
+    if (year_input == 2003) {
+      UGA_dist_MDAcov1_names$MDA_cov <-
+        dummy_dataset1$Cov_2003 # add coverage values to dataframe for mapping
+      UGA_dist_MDAcov1_names$MDA_year <- as.factor("2003")
     }
-if(year_input == 2005 ){
+    if (year_input == 2004) {
+      UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2004
+      UGA_dist_MDAcov1_names$MDA_year <- as.factor("2004")
+    }
+    if (year_input == 2005) {
       UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2005
       UGA_dist_MDAcov1_names$MDA_year <- as.factor("2005")
-      } 
-if(year_input == 2006 ){
+    }
+    if (year_input == 2006) {
       UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2006
       UGA_dist_MDAcov1_names$MDA_year <- as.factor("2006")
-      }
+    }
+    if (year_input == 2007) {
+      UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2007
+      UGA_dist_MDAcov1_names$MDA_year <- as.factor("2007")
+    }
+    if (year_input == 2008) {
+      UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2008
+      UGA_dist_MDAcov1_names$MDA_year <- as.factor("2008")
+    }
+    if (year_input == 2009) {
+      UGA_dist_MDAcov1_names$MDA_cov <- dummy_dataset1$Cov_2009
+      UGA_dist_MDAcov1_names$MDA_year <- as.factor("2009")
+    }
+    return(UGA_dist_MDAcov1_names)
+  }
 
+UGA_dist_MDAcov1_names <-
+  make_cov_byyear_func1(
+    year_input = year_input,
+    UGA_dist_MDAcov1_names = UGA_dist_MDAcov1_names,
+    dummy_dataset1 = dummy_dataset1
+  ) # call func
 
 UGA_districts_MDAcov1_tidy <- left_join(district_map_0309, UGA_dist_MDAcov1_names) # join boundary data to MDA presence data
 
@@ -233,6 +460,14 @@ alpha.MDA.col <- c(0.9, 0.01) # alpha for gpplot depending on MDA fill
 alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov1_tidy$MDA] # vector depending on MDA
 
 UGA_districts_MDAcov1_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+
+UGA_districts_MDAcov1_tidy$alpha.MDA.vec <-
+  ifelse(
+    is.na(UGA_districts_MDAcov1_tidy$MDA_cov) &
+      as.character(UGA_districts_MDAcov1_tidy$MDA) == "MDA",
+    0.01,
+    UGA_districts_MDAcov1_tidy$alpha.MDA.vec
+  ) # some districts coded as MDA (from original analysis) but now no MDA coverage calculated after further data review, so change these to alpha = 0.01
 
 # to plot
 
@@ -260,23 +495,49 @@ UGA_dist_MDAcov2_names$dname_2006_chr <- as.character(UGA_dist_MDAcov2_names$dna
 
 UGA_dist_MDAcov2_names <- UGA_dist_MDAcov2_names[order(UGA_dist_MDAcov2_names$dname_2006_chr),] # TO DO (this is a quick fix): to get this dataframe districts to align with dummy dataset district order 
 
-
-if(year_input == 2003 ){
-  UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2003 # add coverage values to dataframe for mapping
-  UGA_dist_MDAcov2_names$MDA_year <- as.factor("2003")
-  }
-if(year_input == 2004 ){
-    UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2004
-    UGA_dist_MDAcov2_names$MDA_year <- as.factor("2004")
+make_cov_byyear_func2 <-
+  function (year_input,
+            UGA_dist_MDAcov2_names,
+            dummy_dataset2) {
+    if (year_input == 2003) {
+      UGA_dist_MDAcov2_names$MDA_cov <-
+        dummy_dataset2$Cov_2003 # add coverage values to dataframe for mapping
+      UGA_dist_MDAcov2_names$MDA_year <- as.factor("2003")
     }
-if(year_input == 2005 ){
+    if (year_input == 2004) {
+      UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2004
+      UGA_dist_MDAcov2_names$MDA_year <- as.factor("2004")
+    }
+    if (year_input == 2005) {
       UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2005
       UGA_dist_MDAcov2_names$MDA_year <- as.factor("2005")
     }
-if(year_input == 2006 ){
-  UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2006
-  UGA_dist_MDAcov2_names$MDA_year <- as.factor("2006")
-}
+    if (year_input == 2006) {
+      UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2006
+      UGA_dist_MDAcov2_names$MDA_year <- as.factor("2006")
+    }
+    if (year_input == 2007) {
+      UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2007
+      UGA_dist_MDAcov2_names$MDA_year <- as.factor("2007")
+    }
+    if (year_input == 2008) {
+      UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2008
+      UGA_dist_MDAcov2_names$MDA_year <- as.factor("2008")
+    }
+    if (year_input == 2009) {
+      UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2009
+      UGA_dist_MDAcov2_names$MDA_year <- as.factor("2009")
+    }
+    return(UGA_dist_MDAcov2_names)
+  }
+
+UGA_dist_MDAcov2_names <-
+  make_cov_byyear_func2(
+    year_input = year_input,
+    UGA_dist_MDAcov2_names = UGA_dist_MDAcov2_names,
+    dummy_dataset2 = dummy_dataset2
+  )
+
 
 # UGA_dist_MDAcov2_names$MDA_cov <- dummy_dataset2$Cov_2003 # add coverage values to dataframe for mapping
 
@@ -291,6 +552,15 @@ UGA_districts_MDAcov2_tidy$Coverage_approach <- as.factor("denominator: district
 alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov2_tidy$MDA] # vector depending on MDA
 
 UGA_districts_MDAcov2_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+
+UGA_districts_MDAcov2_tidy$alpha.MDA.vec <-
+  ifelse(
+    is.na(UGA_districts_MDAcov2_tidy$MDA_cov) &
+      as.character(UGA_districts_MDAcov2_tidy$MDA) == "MDA",
+    0.01,
+    UGA_districts_MDAcov2_tidy$alpha.MDA.vec
+  ) # some districts coded as MDA (from original analysis) but now no MDA coverage calculated after further data review, so change these to alpha = 0.01
+
 
 # Map_03_MDAcov2 <-
 #   ggplot() +
@@ -316,23 +586,48 @@ UGA_dist_MDAcov3_names$dname_2006_chr <- as.character(UGA_dist_MDAcov3_names$dna
 
 UGA_dist_MDAcov3_names <- UGA_dist_MDAcov3_names[order(UGA_dist_MDAcov3_names$dname_2006_chr),] # TO DO (this is a quick fix): to get this dataframe districts to align with dummy dataset district order 
 
-
-if(year_input == 2003 ){
-  UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2003 # add coverage values to dataframe for mapping
-  UGA_dist_MDAcov3_names$MDA_year <- as.factor("2003")
-  }
-if(year_input == 2004 ){
-    UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2004
-    UGA_dist_MDAcov3_names$MDA_year <- as.factor("2004")
+make_cov_byyear_func3 <-
+  function (year_input,
+            UGA_dist_MDAcov3_names,
+            dummy_dataset3) {
+    if (year_input == 2003) {
+      UGA_dist_MDAcov3_names$MDA_cov <-
+        dummy_dataset3$Cov_2003 # add coverage values to dataframe for mapping
+      UGA_dist_MDAcov3_names$MDA_year <- as.factor("2003")
     }
-if(year_input == 2005 ){
+    if (year_input == 2004) {
+      UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2004
+      UGA_dist_MDAcov3_names$MDA_year <- as.factor("2004")
+    }
+    if (year_input == 2005) {
       UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2005
       UGA_dist_MDAcov3_names$MDA_year <- as.factor("2005")
-      }
-if(year_input == 2006 ){
-  UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2006
-  UGA_dist_MDAcov3_names$MDA_year <- as.factor("2006")
-}
+    }
+    if (year_input == 2006) {
+      UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2006
+      UGA_dist_MDAcov3_names$MDA_year <- as.factor("2006")
+    }
+    if (year_input == 2007) {
+      UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2007
+      UGA_dist_MDAcov3_names$MDA_year <- as.factor("2007")
+    }
+    if (year_input == 2008) {
+      UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2008
+      UGA_dist_MDAcov3_names$MDA_year <- as.factor("2008")
+    }
+    if (year_input == 2009) {
+      UGA_dist_MDAcov3_names$MDA_cov <- dummy_dataset3$Cov_2009
+      UGA_dist_MDAcov3_names$MDA_year <- as.factor("2009")
+    }
+    return(UGA_dist_MDAcov3_names)
+  }
+
+UGA_dist_MDAcov3_names <-
+  make_cov_byyear_func3(
+    year_input = year_input,
+    UGA_dist_MDAcov3_names = UGA_dist_MDAcov3_names,
+    dummy_dataset3 = dummy_dataset3
+  )
 
 #UGA_dist_MDAcov3_names_03$MDA_cov <- dummy_dataset_2003c$Cov_2003 # add coverage values to dataframe for mapping
 
@@ -348,6 +643,14 @@ UGA_districts_MDAcov3_tidy$Coverage_approach <- as.factor("denominator: district
 alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov3_tidy$MDA] # vector depending on MDA
 
 UGA_districts_MDAcov3_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+
+UGA_districts_MDAcov3_tidy$alpha.MDA.vec <-
+  ifelse(
+    is.na(UGA_districts_MDAcov3_tidy$MDA_cov) &
+      as.character(UGA_districts_MDAcov3_tidy$MDA) == "MDA",
+    0.01,
+    UGA_districts_MDAcov3_tidy$alpha.MDA.vec
+  ) # some districts coded as MDA (from original analysis) but now no MDA coverage calculated after further data review, so change these to alpha = 0.01
 
 # Map_03_MDAcov3 <-
 #   ggplot() +
@@ -373,23 +676,49 @@ UGA_dist_MDAcov4_names$dname_2006_chr <- as.character(UGA_dist_MDAcov4_names$dna
 
 UGA_dist_MDAcov4_names <- UGA_dist_MDAcov4_names[order(UGA_dist_MDAcov4_names$dname_2006_chr),] # TO DO (this is a quick fix): to get this dataframe districts to align with dummy dataset district order 
 
-
-if(year_input == 2003 ){
-  UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2003 # add coverage values to dataframe for mapping
-  UGA_dist_MDAcov4_names$MDA_year <- as.factor("2003")
-  }
-if(year_input == 2004 ){
-    UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2004
-    UGA_dist_MDAcov4_names$MDA_year <- as.factor("2004")
+make_cov_byyear_func4 <-
+  function (year_input,
+            UGA_dist_MDAcov4_names,
+            dummy_dataset4) {
+    if (year_input == 2003) {
+      UGA_dist_MDAcov4_names$MDA_cov <-
+        dummy_dataset4$Cov_2003 # add coverage values to dataframe for mapping
+      UGA_dist_MDAcov4_names$MDA_year <- as.factor("2003")
     }
-if(year_input == 2005 ){
+    if (year_input == 2004) {
+      UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2004
+      UGA_dist_MDAcov4_names$MDA_year <- as.factor("2004")
+    }
+    if (year_input == 2005) {
       UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2005
       UGA_dist_MDAcov4_names$MDA_year <- as.factor("2005")
-      }
-if(year_input == 2006 ){
-  UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2006
-  UGA_dist_MDAcov4_names$MDA_year <- as.factor("2006")
-}
+    }
+    if (year_input == 2006) {
+      UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2006
+      UGA_dist_MDAcov4_names$MDA_year <- as.factor("2006")
+    }
+    if (year_input == 2007) {
+      UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2007
+      UGA_dist_MDAcov4_names$MDA_year <- as.factor("2007")
+    }
+    if (year_input == 2008) {
+      UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2008
+      UGA_dist_MDAcov4_names$MDA_year <- as.factor("2008")
+    }
+    if (year_input == 2009) {
+      UGA_dist_MDAcov4_names$MDA_cov <- dummy_dataset4$Cov_2009
+      UGA_dist_MDAcov4_names$MDA_year <- as.factor("2009")
+    }
+    
+    return(UGA_dist_MDAcov4_names)
+  }
+
+UGA_dist_MDAcov4_names <-
+  make_cov_byyear_func4(
+    year_input = year_input,
+    UGA_dist_MDAcov4_names = UGA_dist_MDAcov4_names,
+    dummy_dataset4 = dummy_dataset4
+  )
 
 #UGA_dist_MDAcov4_names_03$MDA_cov <- dummy_dataset_2003d$Cov_2003 # add coverage values to dataframe for mapping
 
@@ -404,6 +733,14 @@ UGA_districts_MDAcov4_tidy$Coverage_approach <- as.factor("denominator: largest 
 alpha.MDA.vec <- alpha.MDA.col[UGA_districts_MDAcov4_tidy$MDA] # vector depending on MDA
 
 UGA_districts_MDAcov4_tidy$alpha.MDA.vec <- alpha.MDA.vec # new column based for alpha in gpplot of each polygon
+
+UGA_districts_MDAcov4_tidy$alpha.MDA.vec <-
+  ifelse(
+    is.na(UGA_districts_MDAcov4_tidy$MDA_cov) &
+      as.character(UGA_districts_MDAcov4_tidy$MDA) == "MDA",
+    0.01,
+    UGA_districts_MDAcov4_tidy$alpha.MDA.vec
+  ) # some districts coded as MDA (from original analysis) but now no MDA coverage calculated after further data review, so change these to alpha = 0.01
 
 # Map_03_MDAcov4 <-
 #   ggplot() +
@@ -441,18 +778,18 @@ plot_UGA_MDA_func <- function(national_map, MDA_data){
     geom_polygon(data = national_map, aes(x=long, y = lat, group = group), color = "black", size = 0.1, fill = "lightgrey") +
     geom_polygon(data= MDA_data, aes(x = long, y = lat, group = group, fill=MDA_cov, alpha = alpha.MDA.vec), colour="black", size = 0.1)+
     coord_equal()+
-    labs(title=MDA_year_label)+
+    labs(title=MDA_year_label, caption ="Dark grey values > 100%")+
     facet_wrap(~Coverage_approach)+
     theme_void()+
-    scale_fill_continuous(name = "MDA Coverage (%)", type = "viridis")+
+    scale_fill_continuous(name = "MDA Coverage (%)", type = "viridis", limits=c(0, 100))+
     scale_alpha_continuous(guide = "none") +
     theme(
-    plot.title = element_text(color="black", size=16, face="bold.italic"))
+    plot.title = element_text(color="black", size=16, face="bold.italic"),
+    plot.caption = element_text(face = "italic", size = 10))
 
 return(Map_0309_MDAcov)
 
 }
-
 
 
 
