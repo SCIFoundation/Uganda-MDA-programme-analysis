@@ -14,6 +14,7 @@ source('libraries.R')
 source('Estimating_denominators.R')
 source('Estimating_coverages.R')
 source('Mapping_coverage.R')
+source('Plotting_coveragebyyear_boxplots.R')
 source('Produce_outputs.R')
 
 # Load data files (.csv) #
@@ -158,7 +159,54 @@ MDA_2009_maps #
 
 
 #=========================#
-#       Print output      #
+#       Print maps        #
 
 print_PDF_Cov_maps(map1 = MDA_2003_maps, map2 = MDA_2004_maps, map3 = MDA_2005_maps, map4 = MDA_2006_maps,
                    map5 = MDA_2007_maps, map6 = MDA_2008_maps, map7 = MDA_2009_maps)
+
+
+#================================================================#
+#=========== Plotting coverage by year (boxplots) ===============#
+#================================================================#
+
+# ================================#
+#   Make dataframes for plotting  #
+
+master_dataframe_cov1 <- create_dataframe_plotting_coverageboxplots_func(cov_type = "cov1",
+                                                                         coverage_dataframe1 = coverage_dataframe1, 
+                                                                         coverage_dataframe2 = coverage_dataframe2,
+                                                                         coverage_dataframe3 = coverage_dataframe3, 
+                                                                         coverage_dataframe4 = coverage_dataframe4)
+
+master_dataframe_cov2 <- create_dataframe_plotting_coverageboxplots_func(cov_type = "cov2",
+                                                                         coverage_dataframe1 = coverage_dataframe1, 
+                                                                         coverage_dataframe2 = coverage_dataframe2,
+                                                                         coverage_dataframe3 = coverage_dataframe3, 
+                                                                         coverage_dataframe4 = coverage_dataframe4)
+
+master_dataframe_cov3 <- create_dataframe_plotting_coverageboxplots_func(cov_type = "cov3",
+                                                                         coverage_dataframe1 = coverage_dataframe1, 
+                                                                         coverage_dataframe2 = coverage_dataframe2,
+                                                                         coverage_dataframe3 = coverage_dataframe3, 
+                                                                         coverage_dataframe4 = coverage_dataframe4)
+
+master_dataframe_cov4 <- create_dataframe_plotting_coverageboxplots_func(cov_type = "cov4",
+                                                                         coverage_dataframe1 = coverage_dataframe1, 
+                                                                         coverage_dataframe2 = coverage_dataframe2,
+                                                                         coverage_dataframe3 = coverage_dataframe3, 
+                                                                         coverage_dataframe4 = coverage_dataframe4)
+
+#===================================#
+#    plot for each type of coverage #
+
+boxplots_cov1 <- plot_boxplot_MDAcov_func(cov_type = "cov1", master_dataframe_cov = master_dataframe_cov1)
+boxplots_cov2 <- plot_boxplot_MDAcov_func(cov_type = "cov2", master_dataframe_cov = master_dataframe_cov2)
+boxplots_cov3 <- plot_boxplot_MDAcov_func(cov_type = "cov3", master_dataframe_cov = master_dataframe_cov3)
+boxplots_cov4 <- plot_boxplot_MDAcov_func(cov_type = "cov4", master_dataframe_cov = master_dataframe_cov4)
+
+#=========================#
+#       Print maps        #
+
+print_PDF_Cov_boxplots(boxplt1 = boxplots_cov1, boxplt2 = boxplots_cov2, boxplt3 = boxplots_cov3, boxplt4 = boxplots_cov4)
+
+

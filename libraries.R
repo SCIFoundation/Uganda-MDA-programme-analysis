@@ -5,7 +5,8 @@
 library(dplyr)
 library(hablar)
 library(broom)
-library(sqldf) # matching cols and inputting cov value
+#library(sqldf) # matching cols and inputting cov value
+library(stringr)
 
 #======================#
 #    Plotting          #
