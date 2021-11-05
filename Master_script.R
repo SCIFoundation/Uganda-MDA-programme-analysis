@@ -19,7 +19,7 @@ source('Produce_outputs.R')
 
 # Load data files (.csv) #
 
-total_doses <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_doses_district&year.csv") # Total PZQ doses by district/year
+total_doses <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_doses_district_year.csv") # Total PZQ doses by district/year
 
 total_targeted <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_targeted_district&year.csv") # Total targted / target population by district/year
 
@@ -28,11 +28,9 @@ district_pop_year <- read.csv("~/Uganda-MDA-programme-analysis/Data/District_pop
 district_pop_year_preestimated <- read.csv("~/Uganda-MDA-programme-analysis/Data/District_pop_year_preestimated.csv") # district pop numbers estimated by year 
                                                                                                                       # (where district pop numbers available from SCI databases 
                                                                                                                       # for a given year, included here instead of 
-                                                                                                                      # pop based on annual growth change)
+# locking files using lft : https://docs.gitlab.com/ee/user/project/file_lock.html                                                                                                                       # pop based on annual growth change)
 
 districts_2006 <- readShapePoly("~/Uganda-MDA-programme-analysis/Data/Uganda shape files/2006 district/UGA_district_boundaries_2006.shp") # need this for 2006
-
-
 
 
 #======================================================#
