@@ -198,9 +198,13 @@ master_dataframe_cov4 <- create_dataframe_plotting_coverageboxplots_func(cov_typ
 #    plot for each type of coverage #
 
 boxplots_cov1 <- plot_boxplot_MDAcov_func(cov_type = "cov1", master_dataframe_cov = master_dataframe_cov1)
+boxplots_cov1
 boxplots_cov2 <- plot_boxplot_MDAcov_func(cov_type = "cov2", master_dataframe_cov = master_dataframe_cov2)
+boxplots_cov2
 boxplots_cov3 <- plot_boxplot_MDAcov_func(cov_type = "cov3", master_dataframe_cov = master_dataframe_cov3)
+boxplots_cov3
 boxplots_cov4 <- plot_boxplot_MDAcov_func(cov_type = "cov4", master_dataframe_cov = master_dataframe_cov4)
+boxplots_cov4
 
 #=========================#
 #       Print maps        #
