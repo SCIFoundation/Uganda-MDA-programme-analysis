@@ -45,6 +45,8 @@ UGA_district_boundaries_0309_function <- function(shape_file, national_map_input
   
   }
 
+# TO DO: make function for 2010 onwards or roll into this function?
+
 #========================================================================================#
 #============ function to get district names (2003-2009) ================================#
 
@@ -55,6 +57,8 @@ district_name_func <- function(shape_file = districts_2006){
   return(UGA_dist_MDA_names_2003_2009)
 
 }
+
+# TO DO: make function for 2010 onwards or roll into this function?
 
 
 #==================================================================================================#
@@ -769,6 +773,8 @@ return(UGA_districts_MDAcov_tidy)
 }
 
 
+# TO DO: include years for 2010 onwards or make new function?
+
 plot_UGA_MDA_func <- function(national_map, MDA_data){
   
   MDA_year_label <- as.character(unique(MDA_data$MDA_year)) # get year for plot title
@@ -791,7 +797,7 @@ return(Map_0309_MDAcov)
 
 }
 
-
+# TO DO: extend to map from 2010, create additional map and call as list, or make new function?
 
 
 

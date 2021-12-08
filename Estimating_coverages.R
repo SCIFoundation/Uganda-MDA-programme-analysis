@@ -30,6 +30,7 @@ estimate_coverage_func1 <- function(dat1, dat2) {
   
 }
 
+# TO DO: extend coverage calc this to 2020
 
 #==================================================================#
 # coverage estimation function # 2 (total doses/ district pop)     #
@@ -60,6 +61,7 @@ estimate_coverage_func2 <- function(dat1, dat2) {
   
 }
 
+# TO DO: extend coverage calc this to 2020
 
 #===============================================================================#
 # coverage estimation function # 3 (total doses/ largest or max target pop)     #
@@ -89,3 +91,5 @@ estimate_coverage_func3 <- function(dat1, dat2) {
   return(cov_data)
   
 }
+
+# TO DO: extend coverage calc this to 2020

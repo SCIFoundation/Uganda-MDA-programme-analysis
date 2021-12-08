@@ -57,6 +57,8 @@ create_dataframe_plotting_coverageboxplots_func <- function(cov_type,
   
 }
 
+# TO DO: extend this to 2020; or produce split maps
+
 #================================#
 #     Plot boxplots function     #
 

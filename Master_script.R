@@ -82,6 +82,8 @@ district_map_0309 <- UGA_district_boundaries_0309_function(shape_file = district
 
 district_names_0309 <- district_name_func(shape_file = districts_2006) 
 
+# TO DO: extend this to 2020; or produce split maps
+
 # =========================================#
 # 3) Mapping coverage by department x years
 
@@ -155,6 +157,7 @@ MDA_2009_dataframe <- district_MDA_coverage_mapping0309_dataframe_func(data1 = c
 MDA_2009_maps <- plot_UGA_MDA_func(national_map = national_map, MDA_data = MDA_2009_dataframe)
 MDA_2009_maps #
 
+# TO DO: eproduce split maps 2010 - 2020
 
 #=========================#
 #       Print maps        #

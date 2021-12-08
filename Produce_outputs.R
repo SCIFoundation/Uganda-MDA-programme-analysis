@@ -15,6 +15,8 @@ print_PDF_Cov_maps <- function(map1, map2, map3, map4, map5, map6, map7){
 
 } 
 
+# TO DO: include maps from 2010 or make new function?
+
 
 # boxplot plotting into a single PDF # 
 print_PDF_Cov_boxplots <- function(boxplt1, boxplt2, boxplt3, boxplt4){
@@ -28,3 +30,4 @@ print_PDF_Cov_boxplots <- function(boxplt1, boxplt2, boxplt3, boxplt4){
 } 
 
 
+# TO DO: include boxplots with new years, or is this already factored in?
