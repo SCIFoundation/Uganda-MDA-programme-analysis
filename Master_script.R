@@ -17,20 +17,44 @@ source('Mapping_coverage.R')
 source('Plotting_coveragebyyear_boxplots.R')
 source('Produce_outputs.R')
 
-# Load data files (.csv) #
+# Load data files (.csv) - first analysis #
 
-total_doses <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_doses_district_year.csv") # Total PZQ doses by district/year
-
-total_targeted <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_targeted_district&year.csv") # Total targted / target population by district/year
-
-district_pop_year <- read.csv("~/Uganda-MDA-programme-analysis/Data/District_pop_year.csv") # district population numbers from 2020 census / annual pop growth 
-
-district_pop_year_preestimated <- read.csv("~/Uganda-MDA-programme-analysis/Data/District_pop_year_preestimated.csv") # district pop numbers estimated by year 
+# total_doses <- read.csv("~/Uganda-MDA-programme-analysis/Data/first analysis/Total_doses_district_year.csv") # Total PZQ doses by district/year
+# 
+# total_targeted <- read.csv("~/Uganda-MDA-programme-analysis/Data/first analysis/Total_targeted_district&year.csv") # Total targted / target population by district/year
+# 
+# district_pop_year <- read.csv("~/Uganda-MDA-programme-analysis/Data/first analysis/District_pop_year.csv") # district population numbers from 2020 census / annual pop growth 
+# 
+# district_pop_year_preestimated <- read.csv("~/Uganda-MDA-programme-analysis/Data/first analysis/District_pop_year_preestimated.csv") # district pop numbers estimated by year 
                                                                                                                       # (where district pop numbers available from SCI databases 
-                                                                                                                      # for a given year, included here instead of 
+# ====================================== #                                                                            # for a given year, included here instead of 
+# Load data files (.csv) - new districts #
+
+total_doses_newdistricts <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_doses_district_bynewdistricts.csv") # Total PZQ doses by district/year
+
+total_targeted_newdistricts <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_trgt_district_bynewdistricts.csv") # Total targted / target population by district/year
+
+district_pop_newdistricts <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_censuspop_district_bynewdistricts.csv") # district population numbers from 2020 census / annual pop growth 
+ 
+
+# ================================================= #                                                                     # for a given year, included here instead of 
+# Load data files (.csv) - old / original districts #
+
+total_doses_originaldistricts <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_doses_district_byoriginaldistricts.csv") # Total PZQ doses by district/year
+
+total_targeted_originaldistricts <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_trgt_district_byoriginaldistricts.csv") # Total targted / target population by district/year
+
+district_pop_originaldistricts <- read.csv("~/Uganda-MDA-programme-analysis/Data/Total_censuspop_district_byoriginaldistricts.csv") # district population numbers from 2020 census / annual pop growth 
+
+
 # locking files using lft : https://docs.gitlab.com/ee/user/project/file_lock.html                                                                                                                       # pop based on annual growth change)
 
 districts_2006 <- readShapePoly("~/Uganda-MDA-programme-analysis/Data/Uganda shape files/2006 district/UGA_district_boundaries_2006.shp") # need this for 2006
+
+
+#======================================================#
+#   ANALYSIS BY ORIGINAL DISTRICTS                     #
+#======================================================#
 
 
 #======================================================#
@@ -38,11 +62,12 @@ districts_2006 <- readShapePoly("~/Uganda-MDA-programme-analysis/Data/Uganda sha
 
 # 1) # create df with district pop projections x year
 
-district_pop_year <- estimate_district_pop_func(dat = district_pop_year) 
+# district_pop_year <- estimate_district_pop_func(dat = district_pop_year) # not required as pre-estimated now
+
 
 # 2) # create df with max/larget target pop denominator x district/year 
 
-largest_target_pop <- estimate_largest_target_pop_func(dat = total_targeted) 
+largest_target_pop <- estimate_largest_target_pop_func(dat = total_targeted_originaldistricts) 
 
 #======================================================#
 #============== Coverage estimation  ==================#

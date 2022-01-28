@@ -22,10 +22,16 @@ estimate_district_pop_func <- function(dat) {
 
 estimate_largest_target_pop_func <- function(dat) {
   
-  data <- dat[ , c(1,2)]
+  #dat$Age <- as.factor(dat$Age)
   
-  data[, "largest_target_pop"] <- apply(dat[, 3:9], 1, hablar::max_) # find max/largest target pop for each row (distirct) across years
+  #dat <- subset(dat, Age == "ALL")
   
+  data <- dat[ , c(1,20)]
+  
+  data[, "largest_target_pop"] <- apply(dat[, 2:19], 1, hablar::max_) # find max/largest target pop for each row (distirct) across years
+  
+  data$largest_target_pop <- round(data$largest_target_pop, digits = 0)
+    
   return(data)
   
 }
