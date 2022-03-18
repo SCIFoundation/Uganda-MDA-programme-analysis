@@ -300,6 +300,7 @@ risk_score2 <- master3_olddistr %>%
 risk_score2 <- master3_olddistr %>% 
   group_by(recoded_districts) %>% 
   dplyr::summarise(n = n(), risk = sum(value),
+                   median_risk = median(value),
                    mode_risk = mymode(value))
 
 risk_score2$mean_risk <- risk_score2$risk/risk_score2$n
@@ -310,6 +311,13 @@ risk_score2 <-
                                breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
                                labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
 
+risk_score2 <- 
+  risk_score2 %>%
+  mutate(median_risk_score = cut(median_risk,
+                               breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                               labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+
+# mode provides best average description with large samples (i.e. all RF values accross a district)
 risk_score2 <- 
   risk_score2 %>%
   mutate(mode_risk_score = cut(as.numeric(mode_risk),
@@ -391,11 +399,11 @@ Uganda_master$label2[Uganda_master$recoded_districts %in% c("Kampala","Kiboga","
 
 risk_map1 <- 
   risk_map +
-  geom_text_repel(data = Uganda_master, aes(lon, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4, family = 'Avenir', segment.color = "#333333")
+  ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4, family = 'Avenir', segment.color = "#333333")
 
 risk_map2 <- 
   risk_map +
-  geom_text_repel(data = Uganda_master, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+  ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
 
 return(list(risk_map1, risk_map2))
 
@@ -541,6 +549,42 @@ find_subdistrictMDA_location_match_riskzone_func <- function(Sub_district_MDA_lo
   
   df_final
   
-  return(list(plot_overlay, plot_overlay2, df_final))
+  #===================================================================================================================#
+  # Where there are >1 MDA locations for a given district, estimate average risk scaore across sub-district MDA sites #
+  
+  mode <- function(codes){
+    which.max(tabulate(codes))
+  }
+  
+  df_final$District <- as.factor(df_final$District)
+  
+  df_final2 <- dplyr::group_by(df_final, District) %>% dplyr::summarize(mean_RF_value = mean(RF_value),
+                                                                        median_RF_value = median(RF_value),
+                                                                        mode_RF_value = mode(RF_value))
+
+  df_final2 <- as.data.frame(df_final2)
+  
+  df_final2  <- 
+    df_final2 %>%
+    dplyr::mutate(mean_risk_score_subdistrict = cut(mean_RF_value,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  # better representation with small sample size (or still biased?)
+  df_final2  <- 
+    df_final2 %>%
+    dplyr::mutate(median_risk_score_subdistrict = cut(median_RF_value,
+                                                    breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                                    labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  # mode doesnt make much sense with small sample sizes
+  df_final2  <- 
+    df_final2 %>%
+    dplyr::mutate(mode_risk_score_subdistrict = cut(mode_RF_value,
+                                                    breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                                    labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  
+  return(list(plot_overlay, plot_overlay2, df_final, df_final2))
   
 }

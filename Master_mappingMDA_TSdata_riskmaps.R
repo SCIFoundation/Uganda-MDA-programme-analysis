@@ -4,6 +4,12 @@
 
 rm(list = ls())
 
+#=======================#                                                                                             
+# Initiatie sub-scripts #                             
+source('libraries.R')
+source('Risk_factor_plotting_funcs.R')
+source('Plotting_UGA_MDA_TSdata.R')
+
 #=============================================#
 #       Load data files                       #
 #=============================================#
@@ -35,14 +41,8 @@ load("~/Uganda-MDA-programme-analysis/Data/sanitation2016.rdata") # 2011 sanitat
 load("~/Uganda-MDA-programme-analysis/Data/poverty_lowest40_2016.rdata") # 2011 poverty distribution spatial file
 
 
-# sub-district MDA mapping 
+# sub-district MDA mapping (add in each time)
 
-
-#=======================#                                                                                             
-# Initiatie sub-scripts #                             
-source('libraries.R')
-source('Risk_factor_plotting_funcs.R')
-source('Plotting_UGA_MDA_TSdata.R')
 
 # ==========================================================#
 # 1) Process & plot UGA TS data with year MDA first started #
@@ -76,10 +76,10 @@ PCC_average_riskscores_distr_2011_df <- calculate_risk_scores_districts_func(dat
 Avg.risk_newdistr_2011 <- PCC_average_riskscores_distr_2011_df[[1]]
 Avg.risk_originaldistr_2011 <- PCC_average_riskscores_distr_2011_df[[2]]
 
-View(Avg.risk_newdistr_2011) # average PCC risk scores for all new districts
-View(Avg.risk_originaldistr_2011) # average PCC risk scores for original districts (pre-2003)
+#View(Avg.risk_newdistr_2011) # average PCC risk scores for all new districts
+#View(Avg.risk_originaldistr_2011) # average PCC risk scores for original districts (pre-2003)
 
-write.csv(Avg.risk_originaldistr_2011, file="Avg.risk_originaldistr_2011.csv")
+#write.csv(Avg.risk_originaldistr_2011, file="Avg.risk_originaldistr_2011.csv")
 
 #=============================================== #
 #   Make district centorids &  risk zones labels #
@@ -114,8 +114,8 @@ PCC_average_riskscores_distr_2001_df <- calculate_risk_scores_districts_func(dat
 Avg.risk_newdistr_2001 <- PCC_average_riskscores_distr_2001_df[[1]]
 Avg.risk_originaldistr_2001 <- PCC_average_riskscores_distr_2001_df[[2]]
 
-View(Avg.risk_newdistr_2001) # average PCC risk scores for all new districts
-View(Avg.risk_originaldistr_2001) # average PCC risk scores for original districts (pre-2003)
+#View(Avg.risk_newdistr_2001) # average PCC risk scores for all new districts
+#View(Avg.risk_originaldistr_2001) # average PCC risk scores for original districts (pre-2003)
 
 #write.csv(Avg.risk_originaldistr_2001, file="Avg.risk_originaldistr_2001.csv")
 
@@ -152,8 +152,8 @@ PCC_average_riskscores_distr_2006_df <- calculate_risk_scores_districts_func(dat
 Avg.risk_newdistr_2006 <- PCC_average_riskscores_distr_2006_df[[1]]
 Avg.risk_originaldistr_2006 <- PCC_average_riskscores_distr_2006_df[[2]]
 
-View(Avg.risk_newdistr_2006) # average PCC risk scores for all new districts
-View(Avg.risk_originaldistr_2006) # average PCC risk scores for original districts (pre-2003)
+#View(Avg.risk_newdistr_2006) # average PCC risk scores for all new districts
+#View(Avg.risk_originaldistr_2006) # average PCC risk scores for original districts (pre-2003)
 
 #write.csv(Avg.risk_originaldistr_2006, file="Avg.risk_originaldistr_2006.csv")
 
@@ -189,8 +189,8 @@ PCC_average_riskscores_distr_2016_df <- calculate_risk_scores_districts_func(dat
 Avg.risk_newdistr_2016 <- PCC_average_riskscores_distr_2016_df[[1]]
 Avg.risk_originaldistr_2016 <- PCC_average_riskscores_distr_2016_df[[2]]
 
-View(Avg.risk_newdistr_2016) # average PCC risk scores for all new districts
-View(Avg.risk_originaldistr_2016) # average PCC risk scores for original districts (pre-2003)
+#View(Avg.risk_newdistr_2016) # average PCC risk scores for all new districts
+#View(Avg.risk_originaldistr_2016) # average PCC risk scores for original districts (pre-2003)
 
 #write.csv(Avg.risk_originaldistr_2016, file="Avg.risk_originaldistr_2016.csv")
 
@@ -210,7 +210,7 @@ plot(avg.risk.map_2016[[2]]) # therefore only plot modal risk scores
 
 
 # for 2004 sub-district MDA data and 2001-2005 risk factor map
-matched_MDA_rf_0305 <- find_subdistrictMDA_location_match_riskzone_func(Sub_district_MDA_locations_df = Sub_district_MDA_locations_df,
+matched_MDA_rf_0305 <- find_subdistrictMDA_location_match_riskzone_func(Sub_district_MDA_locations_df = Sub_district_MDA_locations_2001_2005_df,
                                                  overlay = overlay_2001, avg.risk.map = avg.risk.map_2001)
 
 matched_MDA_rf_0305[[1]]
@@ -219,4 +219,17 @@ matched_MDA_rf_0305[[2]]
 
 matched_MDA_rf_0305[[3]]
 
+matched_MDA_rf_0305[[4]]
 
+
+# for 2012 sub-district MDA data and 2011-2015 risk factor map
+matched_MDA_rf_1115 <- find_subdistrictMDA_location_match_riskzone_func(Sub_district_MDA_locations_df = Sub_district_MDA_locations_2011_2015_df,
+                                                                        overlay = overlay_2011, avg.risk.map = avg.risk.map_2011)
+
+matched_MDA_rf_1115[[1]]
+
+matched_MDA_rf_1115[[2]]
+
+matched_MDA_rf_1115[[3]]
+
+matched_MDA_rf_1115[[4]]
