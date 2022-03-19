@@ -21,3 +21,5 @@ library(ggpubr) # Load some extensions to have multiplot pdf
 library(maps) # needed for mapdata package
 library(mapdata)
 library(maptools)
+library(rgdal)
+library(raster)

@@ -21,6 +21,7 @@ View(UGA_MDA_PCCprev_data)
 # 2) risk factor data: these maps and spatial files have been generated through another R project:
 # https://github.com/SCIFoundation/Uganda_porcine_cysticercosis_risk_mapping
 districts_2001 <- readShapePoly("~/Uganda-MDA-programme-analysis/Data/Uganda shape files/2001 district/uganda_district_2001_1.shp") # need this for 2006
+subcounties_2002 <- readShapePoly("~/Uganda-MDA-programme-analysis/Data/Uganda shape files/Ug_Subcounty-boundaries2002/Ug_Subcounty-boundaries2002.shp") # need this for 2006
 Uganda_dist <- rgdal::readOGR("~/Uganda-MDA-programme-analysis/Data/Uganda shape files/2001 district/uganda_district_2001_1.shp")
 load("~/Uganda-MDA-programme-analysis/Data/pig_populationFAO.rdata") # Pig density map (only one available from FAO/GLW 2007 data)
 
