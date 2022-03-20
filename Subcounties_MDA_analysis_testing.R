@@ -86,6 +86,8 @@ subcounty_name_func <- function(shape_file){
   UGA_dist_subcounty_MDA_names_2010 <- with(UGA_dist_subcounty_MDA_names_2010,  UGA_dist_subcounty_MDA_names_2010[order(Dist_name) , ])
   
   
+  
+  
  #UGA_subcounty_MDA_names_2010 <- data.frame(Subcounty_name = sort(shape_file@data$SNAME_2010)) 
   
   return(list(UGA_dist_subcounty_MDA_names_2006, UGA_dist_subcounty_MDA_names_2010))
@@ -253,4 +255,267 @@ UGA_subcounties_tidy$label <- ifelse(UGA_subcounties_tidy$MDA == "MDA",
     theme(
       plot.title = element_text(color="black", size=16, face="bold.italic"))+
     guides(fill=guide_legend(override.aes=list(shape=21, size=3, colour="black", stroke=1.2))) # need this to get colour in the fill (sample.size) legend
+  
+
+  
+  #====================================================================================#
+  #               Average risk score per sub-county                                    #
+  
+  #PCC_average_riskscores_subcounty_2001_df <- calculate_risk_scores_districts_func(data = overlay_2001[[3]], year = "2001")
+  
+  #===================================#
+  data <- overlay_2001[[3]]
+  
+  # extract lat and longitutdes
+  data$long <- data$x
+  data$lat <- data$y
+  
+  # get distirct co-ordinates to match 
+  
+  # UGA_districts_data <- rnaturalearth::ne_states(country = 'Uganda', 
+  #                                                returnclass = 'sf') %>%
+  #   select(name, name_en)
+  # 
+ 
+  # make lat & lon dataframe into spatial object (sp)
+  xy <- data[,c(1,2)]
+  
+    spdf <- SpatialPointsDataFrame(coords = xy, data = data,
+                                 proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
+  
+  spdf2 <- sf::st_as_sf(spdf) # convert to sp object
+  
+  sf::st_is_valid(spdf2)
+  
+  #mapview::mapview(spdf2) 
+  #=================================#
+  # do the same for sub-county data #
+  subcounties_2010 <- readShapePoly("~/Uganda-MDA-programme-analysis/Data/Uganda shape files/2010 sub-counties/Uganda_Subcounties2010.shp") # need this for 2006
+  
+  data2 <- UGA_subcounties_tidy_subset
+  
+  # #data2 <- raster::mask(subcounties_2010)
+  # 
+  # data2$x <- data2$long
+  # data2$y <- data2$lat
+  # 
+  # xy2 <- data2[,c(21,22)]
+  # 
+  # spdf_sc <- SpatialPointsDataFrame(coords = xy2, data = data2,
+  #                                proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
+  # 
+  # spdf_sc2 <- sf::st_as_sf(spdf_sc,
+  #                          coords = c("long", "lat"),
+  #                          crs= "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") #master2 <- sf::st_join(spdf2, UGA_districts_data) # join risk factor data and admin data
+
+  
+  spdf_sc2 <- sfheaders::sf_polygon(
+    obj = data2
+    , x = "long"
+    , y = "lat"
+    , polygon_id = "SNAME_2006"
+  )
+  
+  sf::st_crs( spdf_sc2 ) <- 4326 # WGS84 (EPSG: 4326)
+  
+  #sf::st_is_valid(spdf_sc2)
+  #mapview::mapview(spdf_sc2)
+  #=================================#
+  master2 <- sf::st_join(spdf2, spdf_sc2) # join risk factor data and admin data
+  
+  master2a <- sf::st_join(spdf2, spdf_sc2) # join risk factor data and admin data - this is for the lake data later
+  
+  #master2 <- tigris::geo_join(spdf, data2, "lat", "lat")
+  # master2 <- dplyr::inner_join(data, data2, by="lat")
+  
+  # data_frame_test <- data.frame(master2$long, master2$lat, master2$value, master2$variable, master2$risk_fact_bins,
+  #                               master2$group, master2$id, master2$DNAME_2006, master2$CNAME_2006,
+  #                               master2$SNAME_2006)
+  
+  # test average risk score
+  master2$subcounty_factor_test <- as.factor(master2$SNAME_2006)
+  
+  sf::st_geometry(master2) <- NULL
+  
+  master3 <- master2 %>% tidyr::drop_na(value)
+  
+  # create risk scores per district
+  risk_score <- master3 %>% 
+    group_by(subcounty_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value))
+  
+  mymode <- function(x) {
+    t <- table(x)
+    names(t)[ which.max(t) ]
+  }
+  
+  risk_score <- master3 %>% 
+    group_by(subcounty_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value),
+                     mode_risk = mymode(value))
+  
+  risk_score$mean_risk <- risk_score$risk/risk_score$n
+  
+  risk_score <- 
+    risk_score %>%
+    mutate(mean_risk_score = cut(mean_risk,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  risk_score <- 
+    risk_score %>%
+    mutate(mode_risk_score = cut(as.numeric(mode_risk),
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+ 
+  View(risk_score)
+  
+  value_rf <- c("grey90", "gold", "darkorchid1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
+  
+  ggplot() +
+    geom_tile(data = overlay_2001[[3]], 
+              aes(x = x, y = y, fill = risk_fact_bins)) +
+    #geom_polygon(data=admin_processed, aes(x=long, y=lat, group=group), color="black", alpha=0) +
+    geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "black", alpha = 1, fill = NA)+
+    geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1.75, fill=NA, alpha=NA)+
+    #geom_polygon(data= UGA_districts_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1, fill=NA, alpha=0.5)+
+    scale_fill_manual(name = "Class",
+                      values = value_rf, 
+                      na.value = NA, na.translate = FALSE)+
+    scale_colour_manual(values=c("purple2",NA), guide=FALSE)+
+    coord_equal() +
+    theme_bw() +
+    theme(panel.grid = element_blank(), 
+          axis.title = element_blank(), 
+          axis.text = element_blank(), 
+          axis.ticks = element_blank(),
+          panel.background = element_blank()) +
+    cowplot::panel_border(remove = TRUE) +
+    #annotate("text", label = year, x = 29.75, y = 3.8, size = 7, colour = "black")+
+    ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+  
+  # ==========================================================================#
+  # need to locate water bodies and remove co-ordinates from analysis for UGA #
+  
+  URL <- "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/physical/ne_50m_lakes.zip"
+  
+  fil <- basename(URL)
+  if (!file.exists(fil)) download.file(URL, fil)
+  fils <- unzip(fil)
+  lakes1 <- readOGR(grep("shp$", fils, value=TRUE), "ne_50m_lakes",
+                   stringsAsFactors=FALSE, verbose=FALSE)
+  
+  #lake_albert <- lakes$label == "Lake Albert"
+  
+  plot(lakes1)
+  
+  lakes2 <- sf::st_as_sf(lakes1)
+  
+  lakes3 <- lakes2 %>% dplyr::select(name, name_en)
+  
+  master_lakes <- sf::st_join(master2a, lakes3)
+  
+  ggplot(data = lakes2) +
+    geom_sf(data = lakes2, fill = "gray80") + 
+    coord_sf(xlim = c(29.0, 35.1), ylim = c(-1.5, 4.32)) # map coordinates in utm
+  
+  lakes3 <- lakes2 %>% dplyr::select(name, name_en)
+  
+  master_lakes <- sf::st_join(master2a, lakes3)
+  
+  
+  master_lakes_filtered <- master_lakes %>% filter(!name %in% c("Lake Victoria", "Lake Albert","Lake Kyoga","Lake Edward")) # removes any observation including lakes
+  
+  # test average risk score
+  master_lakes_filtered$subcounty_factor_test <- as.factor(master_lakes_filtered$SNAME_2006)
+  
+  sf::st_geometry(master_lakes_filtered) <- NULL
+  
+  master_lakes_filtered2 <- master_lakes_filtered %>% tidyr::drop_na(value)
+  
+  # create risk scores per district
+  risk_score_nolakes <- master_lakes_filtered2 %>% 
+    group_by(subcounty_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value))
+  
+  mymode <- function(x) {
+    t <- table(x)
+    names(t)[ which.max(t) ]
+  }
+  
+  risk_score_nolakes <- master_lakes_filtered2 %>% 
+    group_by(subcounty_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value),
+                     mode_risk = mymode(value))
+  
+  risk_score_nolakes$mean_risk <- risk_score_nolakes$risk/risk_score_nolakes$n
+  
+  risk_score_nolakes <- 
+    risk_score_nolakes %>%
+    mutate(mean_risk_score = cut(mean_risk,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  risk_score_nolakes <- 
+    risk_score_nolakes %>%
+    mutate(mode_risk_score = cut(as.numeric(mode_risk),
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  
+  View(risk_score_nolakes)
+  
+  lakes_UGA <- lakes2 %>% dplyr::select(name, name_en)
+  
+  lakes_UGA <- lakes_UGA %>% filter(name %in% c("Lake Victoria", "Lake Albert","Lake Kyoga","Lake Edward"))
+  
+  value_rf <- c("grey90", "gold", "darkorchid1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
+  
+  
+  ggplot() +
+    geom_tile(data = overlay_2001[[3]], 
+              aes(x = x, y = y, fill = risk_fact_bins)) +
+    #geom_polygon(data=admin_processed, aes(x=long, y=lat, group=group), color="black", alpha=0) +
+    geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
+    #geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1.75, fill=NA, alpha=NA)+
+    #geom_polygon(data= UGA_districts_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1, fill=NA, alpha=0.5)+
+    geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue") + 
+    geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1.1, fill=NA, alpha=NA)+
+    scale_fill_manual(name = "Class",
+                      values = value_rf, 
+                      na.value = NA, na.translate = FALSE)+
+    scale_colour_manual(values=c("black",NA), guide=FALSE)+
+    coord_equal() +
+    theme_bw() +
+    theme(panel.grid = element_blank(), 
+          axis.title = element_blank(), 
+          axis.text = element_blank(), 
+          axis.ticks = element_blank(),
+          panel.background = element_blank()) +
+    cowplot::panel_border(remove = TRUE) +
+    #annotate("text", label = year, x = 29.75, y = 3.8, size = 7, colour = "black")+
+    ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+   coord_sf(xlim = c(29.83, 35.1), ylim = c(-1.5, 4.32))
+ 
+    
+  # test.points <- data.frame(lon = c(1.658854,1.547387,1.137820,1.173587),
+  #                           lat = c(31.127233,31.258073,30.782171,30.616079))
+  # 
+  # coordinates(test.points) <- ~lon+lat
+  # proj4string(test.points) <- CRS(proj4string(lakes2))
+  # 
+  # over(test.points, lakes2)
+  
+  
+  # ggplot() +
+  #   geom_tile(data = lakes, 
+  #             aes(x = x, y = y, fill = risk_fact_bins)) +
+  #   #geom_polygon(data=admin_processed, aes(x=long, y=lat, group=group), color="black", alpha=0) +
+  #   geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "black", alpha = 1, fill = NA)
+  # 
+  # 
+  # lakes <- readShapePoly("C:/Users/MattDixon/OneDrive - SCI Foundation/Documents/Uganda-MDA-programme-analysis/Data/Uganda shape files/Uganda lakes/ne_50m_lakes.shp")
+  # 
+  # plot(lakes)
   
