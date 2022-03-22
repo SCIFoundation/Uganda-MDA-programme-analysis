@@ -1665,29 +1665,43 @@ subcounty_name_func <- function(shape_file){
   
   UGA_dist_subcounty_MDA_names_2006 <- with(UGA_dist_subcounty_MDA_names_2006,  UGA_dist_subcounty_MDA_names_2006[order(Dist_name) , ])
   
-  
+  # rename sub-counties for 2004 where duplicates
   UGA_dist_subcounty_MDA_names_2006$Subcounty_name <- ifelse(UGA_dist_subcounty_MDA_names_2006$Dist_name == "MAYUGE" & 
                                                                UGA_dist_subcounty_MDA_names_2006$Subcounty_name == "MALONGO", 
                                                              "MALONGO1", UGA_dist_subcounty_MDA_names_2006$Subcounty_name)
+  
   
   UGA_dist_subcounty_MDA_names_2010 <- data.frame(Dist_name = shape_file@data$DNAME_2010,
                                                   Subcounty_name = shape_file@data$SNAME_2010) 
   
   UGA_dist_subcounty_MDA_names_2010 <- with(UGA_dist_subcounty_MDA_names_2010,  UGA_dist_subcounty_MDA_names_2010[order(Dist_name) , ])
   
-  UGA_dist_subcounty_MDA_names_2010$Subcounty_name <- ifelse(UGA_dist_subcounty_MDA_names_2010$Dist_name == "MAYUGE" & 
+  # rename sub-counties for 2012 where duplicates
+    UGA_dist_subcounty_MDA_names_2010$Subcounty_name <- ifelse(UGA_dist_subcounty_MDA_names_2010$Dist_name == "MAYUGE" & 
                                                                UGA_dist_subcounty_MDA_names_2010$Subcounty_name == "MALONGO", 
                                                   "MALONGO1", UGA_dist_subcounty_MDA_names_2010$Subcounty_name)
-  
+    
+    UGA_dist_subcounty_MDA_names_2010$Subcounty_name <- ifelse(UGA_dist_subcounty_MDA_names_2010$Dist_name == "MASAKA" & 
+                                              UGA_dist_subcounty_MDA_names_2010$Subcounty_name == "BUWUNGA", 
+                                            "BUWUNGA1", UGA_dist_subcounty_MDA_names_2010$Subcounty_name) # must also change any duplicate sub-counties with MDA in this object
+ 
+    UGA_dist_subcounty_MDA_names_2010$Subcounty_name <- ifelse(UGA_dist_subcounty_MDA_names_2010$Dist_name == "JINJA" & 
+                                                    UGA_dist_subcounty_MDA_names_2010$Subcounty_name == "CENTRAL DIVISION", 
+                                                  "CENTRAL DIVISION1", UGA_dist_subcounty_MDA_names_2010$Subcounty_name) # must also change any duplicate sub-counties with MDA in this object
+    
+    UGA_dist_subcounty_MDA_names_2010$Subcounty_name <- ifelse(UGA_dist_subcounty_MDA_names_2010$Dist_name == "KAYUNGA" & 
+                                                    UGA_dist_subcounty_MDA_names_2010$Subcounty_name == "KAYONZA", 
+                                                  "KAYONZA1", UGA_dist_subcounty_MDA_names_2010$Subcounty_name) # must also change any duplicate sub-counties with MDA in this object
+    
   return(list(UGA_dist_subcounty_MDA_names_2006, UGA_dist_subcounty_MDA_names_2010))
   
 }
 
-# ==================================================== #
-# get subcounties names variable (not unique) function #
-subcounties_name_func <- function(shape_file){
+# ========================================================================================================== #
+# get subcounties names variable (not unique) function - prepare for next stage (select by presence of MDA)  #
+subcounties_name_func2 <- function(shape_file, year){
   
-  #UGA_dist_MDA_names <- data.frame(Dist_name = sort(shape_file@data$dname_2006))
+  if(year == 2004){
   
   UGA_SC_MDA_names <- data.frame(Subcounty_name = shape_file@data$SNAME_2006,
                                  District_name = shape_file@data$DNAME_2006) 
@@ -1696,6 +1710,28 @@ subcounties_name_func <- function(shape_file){
   
   UGA_SC_MDA_names$Subcounty_name <- ifelse(UGA_SC_MDA_names$District_name == "MAYUGE" & UGA_SC_MDA_names$Subcounty_name == "MALONGO", 
                                          "MALONGO1", UGA_SC_MDA_names$Subcounty_name)
+}
+  
+  if(year == 2012){
+    
+    UGA_SC_MDA_names <- data.frame(Subcounty_name = shape_file@data$SNAME_2010,
+                                   District_name = shape_file@data$DNAME_2010) 
+    
+    UGA_SC_MDA_names <- with(UGA_SC_MDA_names,  UGA_SC_MDA_names[order(District_name) , ])
+    
+    UGA_SC_MDA_names$Subcounty_name <- ifelse(UGA_SC_MDA_names$District_name == "MASAKA" & UGA_SC_MDA_names$Subcounty_name == "BUWUNGA", 
+                                            "BUWUNGA1", UGA_SC_MDA_names$Subcounty_name)
+
+    UGA_SC_MDA_names$Subcounty_name <- ifelse(UGA_SC_MDA_names$District_name == "JINJA" & UGA_SC_MDA_names$Subcounty_name == "CENTRAL DIVISION", 
+                                            "CENTRAL DIVISION1", UGA_SC_MDA_names$Subcounty_name)
+    
+    UGA_SC_MDA_names$Subcounty_name <- ifelse(UGA_SC_MDA_names$District_name == "KAYUNGA" & UGA_SC_MDA_names$Subcounty_name == "KAYONZA", 
+                                              "KAYONZA1", UGA_SC_MDA_names$Subcounty_name)
+    
+    UGA_SC_MDA_names$Subcounty_name <- ifelse(UGA_SC_MDA_names$District_name == "MAYUGE" & UGA_SC_MDA_names$Subcounty_name == "MALONGO", 
+                                              "MALONGO1", UGA_SC_MDA_names$Subcounty_name)
+  }
+  
   
   return(UGA_SC_MDA_names)
   
@@ -1743,7 +1779,76 @@ subcounty_MDA_processing_plotting_func <- function(sc_names, UGA_subcounties_tid
     
     UGA_subcounties_tidy$label <- ifelse(UGA_subcounties_tidy$MDA == "MDA", 
                                      UGA_subcounties_tidy$SNAME_2006, NA)
-    }
+  }
+  
+  if (year == 2012){
+    
+    MDA_subcounties <-
+      c("ABER", "ACHOLIBUR","ADILANG", "ADJUMANI TC", "AGORO", "AGWATA", "AKALO", "AKOKORO",
+        "ALERO", "ALOI", "AMURU", "ANAKA", "APUTI", "ATANGA", "ATIAK", "AWACH", "AWELO",
+        "AWERE", "BAGEZZA", "BAITAMBOGWE", "BANDA", "BAR-DEGE", "BBAALE", "BELEAFE",
+        "BIISO", "BOBI", "BUDONDO", "BUFUMIRA", "BUHEHE", "BUJJUMBA", "BUKAKATA","BUKULULA",
+        "BULERA", "BULIISA", "BULULU", "BUNGATIRA", "BUSAMUZI", "BUSERUKA", "BUSIMBI",
+        "BUTOLOOGO", "BUWAMA", "BUWUNGA1", "BUYENDE", "BWAMBARA", "BWEEMA", "BWIKARA",
+        "CENTRAL DIVISION1", "CHAWENTE", "CIFORO", "DUFILE", "DZAIPI", "GALIRAAYA", "GIMARA",
+        "IBUJE", "IBULANKU", "IMMANYIRO", "INOMO", "ITULA", "IVUKULA", "KABWOYA", "KADUNGULU",
+        "KAGULU", "KAKOMONGOLE", "KALANGALA TC", "KALONGO", "KALUNGI", "KANARA", "KANGAI",
+        "KANGULUMIRA", "KARUGUTU", "KASANJE", "KATABI","KATUNGURU", "KATWE KABATORO TC", "KAYONZA1",
+        "KEI", "KICHWAMBA", "KICUZI", "KIDERA","KIGANDALO","KIGOROBYA","KIGOROBYA TC",
+        "KILAK","KITIGUM MATIDI","KITGUM TC", "KITYERERA","KKOME ISLANDS","KOBOKO TC","KORO",
+        "KULUBA", "KURU", "KYAMUSWA", "KYANAMUKAAKA", "KYANGWALI", "LABONGO AKWANG", 
+        "LABONGO AMIDA", "LABONGO LAYAMO", "LAGORO", "LAGUTI", "LAKWANA", "	LALOGI", 
+        "LAMOGI", "LAPUL", "LAROO", "LAYIBI", "LEFORI", "LIRA PALWO", "LOBULE", "LOKUNG",
+        "LOREGAE", "LORO", "LUDARA", "LUMINO", "LUNYO", "LWABYATA", "LWAMPANGA", "LYAMA",
+        "MADI OPEI", "MALONGO1", "MASABA", "MASINDI PORT", "MAZINGA", "METU", "MIDIA",
+        "MIDIGO", "MOLO", "MOYO", "MPEEFU", "MUCWINI", "MUGOYE", "MUHOKYA", "MUNTU",
+        "MUTUMBA", "NABISWERA", "NAJJA", "NAKISUNGA", "NAMALU", "NAMANYONYI", "NAMASALE",
+        "NAMBIESO", "	NAMOKORA", "NAMUGONGO", "NANKOMA", "NGOGWE", "NKONDO", "NTENJERU",
+        "NYENGA", "ODEK", "OFUA", "OGOKO", "OKOLLO", "OMIYA ANYIMA", "OMOT", "OMUGO", "ONGAKO",
+        "ONGINO", "OROM", "OTWAL", "PABBO", "PADER TC", "PADIBE EAST", "PADIBE WEST",
+        "PAICHO", "PAIMOL", "PAJULE", "PAKELLE", "PAKWACH", "PAKWACH TC", "PALABEK GEM",
+        "PALABEK KAL", "PALARO", "PALOGA", "PANYIMUR","PANYANGO","PATIKO","PATONGO", "PECE",
+        "PINGIRE","PURANGA","PURONGO","RHINO CAMP","RIGBO","ROMOGI","RUGASHARI","	RUTEETE",
+        "RWEBISENGO","SIBANGA","SIGULU ISLANDS","SSI-BUKUNJA","SSISA","WADELAI","WAKISI",
+        "WOL") 
+  }
+  
+  if (year == 2012) {
+    sc_names # copy variable (dist names) : UGA_dist_MDA_names <- district_names 
+    
+    sc_names$MDA <- ifelse(sc_names$Subcounty_name %in% MDA_subcounties, "MDA","none") # code whether MDA or not
+    
+    sc_names <- sc_names  %>% rename(SNAME_2010 = Subcounty_name, DNAME_2010 = District_name) # rename column
+    
+    UGA_subcounties_tidy$SNAME_2010 <- ifelse(UGA_subcounties_tidy$DNAME_2010 == "MAYUGE" & UGA_subcounties_tidy$SNAME_2010 == "MALONGO", 
+                                              "MALONGO1", UGA_subcounties_tidy$SNAME_2010) # must also change any duplicate sub-counties with MDA in this object
+    
+    UGA_subcounties_tidy$SNAME_2010 <- ifelse(UGA_subcounties_tidy$DNAME_2010 == "MASAKA" & UGA_subcounties_tidy$SNAME_2010 == "BUWUNGA", 
+                                              "BUWUNGA1", UGA_subcounties_tidy$SNAME_2010) # must also change any duplicate sub-counties with MDA in this object
+    
+    UGA_subcounties_tidy$SNAME_2010 <- ifelse(UGA_subcounties_tidy$DNAME_2010 == "JINJA" & UGA_subcounties_tidy$SNAME_2010 == "CENTRAL DIVISION", 
+                                              "CENTRAL DIVISION1", UGA_subcounties_tidy$SNAME_2010) # must also change any duplicate sub-counties with MDA in this object
+    
+    UGA_subcounties_tidy$SNAME_2010 <- ifelse(UGA_subcounties_tidy$DNAME_2010 == "KAYUNGA" & UGA_subcounties_tidy$SNAME_2010 == "KAYONZA", 
+                                              "KAYONZA1", UGA_subcounties_tidy$SNAME_2010) # must also change any duplicate sub-counties with MDA in this object
+    
+    # ==================================================== #
+    # make MDA yes or no variable for sub counties with MDA
+    UGA_subcounties_tidy <- left_join(UGA_subcounties_tidy, sc_names) # join boundary data to MDA presence data
+    
+    UGA_subcounties_tidy$MDA <- as.factor(UGA_subcounties_tidy$MDA) # make MDA presence a factor
+    
+    MDA.SC.col <- c("purple2", NA) # to colour MDA districts
+    
+    MDA.SC.vec <- MDA.SC.col[UGA_subcounties_tidy$MDA] # specify colour for each polygon
+    
+    UGA_subcounties_tidy$MDA_colour <- MDA.SC.vec # new column for fill in ggplot depending on MDA
+    
+    UGA_subcounties_tidy$label <- ifelse(UGA_subcounties_tidy$MDA == "MDA", 
+                                         UGA_subcounties_tidy$SNAME_2010, NA)
+  
+  }
+    
 
 # ===========================================================================================================#
 #  Extract district MDAs (valid for all MDAs across 2033-2019 when analysing by original districts of 2003)  #
@@ -1755,13 +1860,23 @@ district_names_0319 <- district_name_func(shape_file = districts_2001) # using o
 UGA_dist_MDA_names <- district_names_0319 # copy variable (dist names)
 
 if (year == 2004){
-  
-  # repeat for districts to highlight & check sub-counties (for each district) for 2004#
-  
-  MDA_districts <-
+    # repeat for districts to highlight & check sub-counties (for each district) for 2004#
+    MDA_districts <-
     c("APAC", "MOYO", "ADJUMANI", "ARUA", "NEBBI", "LIRA", "NAKASONGOLA", "MASINDI", "HOIMA", "BUGIRI",
     "BUSIA", "KAYUNGA", "JINJA", "MUKONO", "WAKISO", "MAYUGE", "BUNDIBUGYO", "KIBAALE") # vector of districts with MDA in 2003
-  
+} 
+
+if (year == 2012){
+  # repeat for districts to highlight & check sub-counties (for each district) for 2004#
+  MDA_districts <-
+    c("PADER","APAC","KITGUM","MOYO","YUMBE","ARUA","NEBBI","GULU","LIRA","KABERAMAIDO",
+      "NAKASONGOLA","HOIMA","BUGIRI","BUSIA","KAYUNGA","JINJA","MUKONO","WAKISO",
+      "MAYUGE","MPIGI","KABAROLE","MUBENDE","BUNDIBUGYO","KIBAALE","SOROTI","PALLISA",
+      "KAMULI","MASINDI","ADJUMANI","MASAKA","MBARARA","RUKUNGIRI","BUSHENYI",
+      "KAMWENGE","KASESE","KALANGALA") # vector of districts with MDA in 2003
+} 
+
+
   UGA_dist_MDA_names$MDA <- ifelse(district_names_0319$Dist_name %in% MDA_districts, "MDA","none") # code whether MDA or not
   
   UGA_dist_MDA_names <- UGA_dist_MDA_names  %>% rename(DISTRICT = Dist_name) # rename column
@@ -1775,29 +1890,61 @@ if (year == 2004){
   MDA.dist.vec <- MDA.dist.col[UGA_districts_tidy$MDA] # specify colour for each polygon
   
   UGA_districts_tidy$MDA_colour <- MDA.dist.vec # new column for fill in ggplot depending on MDA
-} 
+ 
+#======================= 
+# make labels for plot
 
-
+if (year == 2004){
 # make labels (sub-counties with MDA) for plotting
 UGA_subcounties_tidy_subset <- subset(UGA_subcounties_tidy, MDA=="MDA")   #subset just for NYS
 scnames <- aggregate(cbind(long, lat) ~ SNAME_2006, data=UGA_subcounties_tidy_subset, FUN=mean)
 scnames$label <- scnames$SNAME_2006
+}
+
+if (year == 2012){
+  # make labels (sub-counties with MDA) for plotting
+  UGA_subcounties_tidy_subset <- subset(UGA_subcounties_tidy, MDA=="MDA")   #subset just for NYS
+  scnames <- aggregate(cbind(long, lat) ~ SNAME_2010, data=UGA_subcounties_tidy_subset, FUN=mean)
+  scnames$label <- scnames$SNAME_2010
+}
 
 
-# PLOT:
-plot1 <- ggplot() +
-  geom_polygon(data = national_map, aes(x=long, y = lat, group = group), color = "black", size = 0.1, fill = "lightgrey") +
-  geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "black", alpha = 1, fill = NA)+
-  geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 0.75, fill=NA, alpha=NA)+
-  geom_polygon(data= UGA_districts_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1, fill=NA, alpha=0.5)+
-  coord_equal(ratio = 1)+
-  scale_colour_manual(values=c("blue","purple2",NA), guide=FALSE)+
-  ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
-  theme_void()+
-  theme(
-    plot.title = element_text(color="black", size=16, face="bold.italic"))+
-  guides(fill=guide_legend(override.aes=list(shape=21, size=3, colour="black", stroke=1.2))) # need this to get colour in the fill (sample.size) legend
-
+# PLOT
+  
+  if (year == 2004){
+    plot1 <- ggplot() +
+      geom_polygon(data = national_map, aes(x=long, y = lat, group = group), color = "black", size = 0.1, fill = "lightgrey") +
+      geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "black", alpha = 1, fill = NA)+
+      geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 0.75, fill=NA, alpha=NA)+
+      geom_polygon(data= UGA_districts_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1, fill=NA, alpha=0.5)+
+      coord_equal(ratio = 1)+
+      scale_colour_manual(values=c("blue","purple2",NA), guide=FALSE)+
+      ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+      theme_void()+
+      theme(
+        plot.title = element_text(color="black", size=16, face="bold.italic"))+
+      guides(fill=guide_legend(override.aes=list(shape=21, size=3, colour="black", stroke=1.2))) # need this to get colour in the fill (sample.size) legend
+  }
+  
+  if (year == 2012){
+    
+    UGA_districts_tidy_subset <- subset(UGA_districts_tidy, MDA=="MDA")   # subset MDA districts to plot
+    
+    plot1 <- ggplot() +
+      geom_polygon(data = national_map, aes(x=long, y = lat, group = group), color = "black", size = 0.1, fill = "lightgrey") +
+      geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "black", alpha = 1, fill = NA)+
+       geom_polygon(data= UGA_districts_tidy_subset, aes(x = long, y = lat, group = group), fill= "purple", size = 1, alpha=0.25)+
+      geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 0.75, fill=NA, alpha=NA)+
+      coord_equal(ratio = 1)+
+      scale_colour_manual(values=c("blue","purple2",NA), guide=FALSE)+
+      ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 2.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+      theme_void()+
+      theme(
+        plot.title = element_text(color="black", size=16, face="bold.italic"))+
+      guides(fill=guide_legend(override.aes=list(shape=21, size=3, colour="black", stroke=1.2))) # need this to get colour in the fill (sample.size) legend
+  }
+  
+  
 
 return(list(UGA_subcounties_tidy, UGA_districts_tidy, plot1, scnames, UGA_subcounties_tidy_subset))
 } 
