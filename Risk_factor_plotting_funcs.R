@@ -598,8 +598,8 @@ find_subdistrictMDA_location_match_riskzone_func <- function(Sub_district_MDA_lo
 #        Average risk factor per sub-county (area) recieving MDA function      #
 
 
-average_risk_subcounties_func <- function(RF_data, subcounties_2010, subcounty_MDA_data, scnames, UGA_subcounties_tidy_subset, 
-                                          UGA_subcounties_tidy, districts_2001, year){
+average_risk_subcounties_func <- function(RF_data, subcounties, subcounty_MDA_data, scnames, UGA_subcounties_tidy_subset, 
+                                          UGA_subcounties_tidy, districts_2001, UGA_districts_tidy_subset, year){
 
   RF_data_plotting <- RF_data # maintain original risk factor overlay for plotting later
   
@@ -610,8 +610,12 @@ average_risk_subcounties_func <- function(RF_data, subcounties_2010, subcounty_M
     data <- overlay_2001[[3]]
   }
   
-  if(year == 2012){
+  if(year == 2012 || year == 2015){
     data <- overlay_2011[[3]]
+  }
+  
+  if(year == 2016 || year == 2018){
+    data <- overlay_2016[[3]]
   }
   
   # extract lat and longitutdes
@@ -651,6 +655,38 @@ average_risk_subcounties_func <- function(RF_data, subcounties_2010, subcounty_M
     )
   }
   
+  
+  if(year == 2015 || year == 2016 || year == 2018){
+    # make into an sf (spatial) object for joining
+
+    subcounty_MDA_data <- with(subcounty_MDA_data,  subcounty_MDA_data[order(Subcounty) , ])
+    
+    spdf_sc2 <- sfheaders::sf_polygon(
+      obj = subcounty_MDA_data
+      , x = "long"
+      , y = "lat"
+      , polygon_id = "Subcounty"
+    )
+  }
+  
+  # if(year == 2015){
+  #   # make into an sf (spatial) object for joining
+  #   subcounty_MDA_data <- transform(subcounty_MDA_data,                         
+  #                                   polygon_id = as.numeric(factor(Subcounty))) # Create ID by group
+  #   
+  #   subcounty_MDA_data$linestring_id <- subcounty_MDA_data$polygon_id
+  #   
+  #   subcounty_MDA_data$x <- subcounty_MDA_data$long
+  #   subcounty_MDA_data$y <- subcounty_MDA_data$lat
+  # 
+  #   spdf_sc2 <- sfheaders::sf_poly(subcounty_MDA_data, keep = TRUE)
+  # }
+
+  # if(year == 2015){
+  #   spdf_sc2 <- sf::st_as_sf(subcounty_MDA_data)
+  # }
+  
+  
   sf::st_crs( spdf_sc2 ) <- 4326 # WGS84 (EPSG: 4326)
   
  
@@ -667,6 +703,10 @@ average_risk_subcounties_func <- function(RF_data, subcounties_2010, subcounty_M
   
   if(year == 2012){
     master2$subcounty_factor_test <- as.factor(master2$SNAME_2010)
+  }
+  
+  if(year == 2015 || year == 2016 || year == 2018){
+    master2$subcounty_factor_test <- as.factor(master2$Subcounty)
   }
   
   sf::st_geometry(master2) <- NULL
@@ -731,6 +771,10 @@ average_risk_subcounties_func <- function(RF_data, subcounties_2010, subcounty_M
   
   if(year == 2012){
     master_dist2 <- master_dist2 %>% tidyr::drop_na(SNAME_2010)
+  }
+  
+  if(year == 2015 || year == 2016 || year == 2018){
+    master_dist2 <- master_dist2 %>% tidyr::drop_na(Subcounty)
   }
   
   # ================================#
@@ -812,10 +856,30 @@ plot2 <- ggplot() +
   ggrepel::geom_text_repel(data = dnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
 
 
+plot3 <- ggplot() +
+  geom_tile(data = RF_data_plotting, 
+            aes(x = x, y = y, fill = risk_fact_bins)) +
+  geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
+  geom_polygon(data= UGA_districts_tidy_subset, aes(x = long, y = lat, group = group), colour= "grey45", size = 1, alpha=0.25, fill=NA)+
+  geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1.2, fill=NA, alpha=NA, linetype = "longdash")+
+  scale_fill_manual(name = "Class",
+                    values = value_rf, 
+                    na.value = NA, na.translate = FALSE)+
+  scale_colour_manual(values=c("black",NA), guide=FALSE)+
+  coord_equal() +
+  theme_bw() +
+  theme(panel.grid = element_blank(), 
+        axis.title = element_blank(), 
+        axis.text = element_blank(), 
+        axis.ticks = element_blank(),
+        panel.background = element_blank()) +
+  cowplot::panel_border(remove = TRUE) +
+  ggrepel::geom_text_repel(data = dnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+
 
 }
 
-if(year == 2012){
+if(year == 2012 || year == 2015 || year == 2016 || year == 2018){
   plot1 <- ggplot() +
     geom_tile(data = RF_data_plotting, 
               aes(x = x, y = y, fill = risk_fact_bins)) +
@@ -853,9 +917,32 @@ if(year == 2012){
           panel.background = element_blank()) +
     cowplot::panel_border(remove = TRUE) +
     ggrepel::geom_text_repel(data = dnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
-}
 
-return(list(risk_score, risk_score_dist, plot1, plot2, master2, master_lake, master_dist_tosave, dnames))
+  
+  plot3 <- ggplot() +
+    geom_tile(data = RF_data_plotting, 
+              aes(x = x, y = y, fill = risk_fact_bins)) +
+    geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
+    geom_polygon(data= UGA_districts_tidy_subset, aes(x = long, y = lat, group = group), colour= "grey45", size = 1, alpha=0.25,fill=NA)+
+    geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 1.2, fill=NA, alpha=NA, linetype = "longdash")+
+    scale_fill_manual(name = "Class",
+                      values = value_rf, 
+                      na.value = NA, na.translate = FALSE)+
+    scale_colour_manual(values=c("black",NA), guide=FALSE)+
+    coord_equal() +
+    theme_bw() +
+    theme(panel.grid = element_blank(), 
+          axis.title = element_blank(), 
+          axis.text = element_blank(), 
+          axis.ticks = element_blank(),
+          panel.background = element_blank()) +
+    cowplot::panel_border(remove = TRUE) +
+    ggrepel::geom_text_repel(data = dnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+  
+  
+  }
+
+return(list(risk_score, risk_score_dist, plot1, plot2, master2, master_lake, master_dist_tosave, dnames, plot3))
 
 }
 
@@ -895,6 +982,10 @@ average_risk_subcounties_func2 <- function(data_to_join, data_to_join2, RF_data_
   
   if(year == 2012){
     master_lakes_filtered$subcounty_factor_test <- as.factor(master_lakes_filtered$SNAME_2010)
+  }
+  
+  if(year == 2015 || year == 2016 || year == 2018){
+    master_lakes_filtered$subcounty_factor_test <- as.factor(master_lakes_filtered$Subcounty)
   }
   
   sf::st_geometry(master_lakes_filtered) <- NULL
@@ -951,6 +1042,10 @@ average_risk_subcounties_func2 <- function(data_to_join, data_to_join2, RF_data_
   
   if(year == 2012){
   master_lakes_district_filtered2 <- master_lakes_district_filtered2 %>% tidyr::drop_na(SNAME_2010)
+  }
+  
+  if(year == 2015 || year == 2016 || year == 2018){
+    master_lakes_district_filtered2 <- master_lakes_district_filtered2 %>% tidyr::drop_na(Subcounty)
   }
   
   # create risk scores per sub-county
@@ -1010,7 +1105,7 @@ average_risk_subcounties_func2 <- function(data_to_join, data_to_join2, RF_data_
   coord_sf(xlim = c(29.83, 35.1), ylim = c(-1.5, 4.32))
   }
   
-  if(year == 2012){
+  if(year == 2012 || year == 2015 || year == 2016 || year == 2018){
     plot1 <- ggplot() +
       geom_tile(data = RF_data_plotting, 
                 aes(x = x, y = y, fill = risk_fact_bins)) +
