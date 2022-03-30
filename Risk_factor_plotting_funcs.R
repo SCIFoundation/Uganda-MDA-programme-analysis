@@ -1162,3 +1162,450 @@ average_risk_subcounties_func2 <- function(data_to_join, data_to_join2, RF_data_
 return(list(risk_score_nolakes, plot1, risk_score_district_nolakes, plot2, dnames2))
 
 }
+
+
+
+#======================================================================================================================#
+#    Average risk score function for sub-counties/average across sub-counties for those with PCC studies               #
+#======================================================================================================================#
+
+
+#==============================================================================#
+#        Average risk factor per sub-county (area) recieving MDA function      #
+
+
+average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCstudies_data, scnames, UGA_subcounties_tidy_subset, 
+                                          UGA_subcounties_tidy, districts_2001, UGA_districts_tidy_subset, year){
+  
+  RF_data_plotting <- RF_data # maintain original risk factor overlay for plotting later
+  
+  #==================================================================================#
+  # combine spatial objects: risk factor values across UGA & sub-county spatial data #
+  
+  # if(year == 2004){
+  #   data <- overlay_2001[[3]]
+  # }
+  
+  if(year == 2011 || year == 2015){
+    data <- overlay_2011[[3]]
+  }
+  
+  if(year == 2019){
+    data <- overlay_2016[[3]]
+  }
+  
+  # extract lat and longitutdes
+  RF_data$long <- data$x
+  RF_data$lat <- data$y
+  
+  # make lat & lon dataframe into spatial object (sp)
+  xy <- RF_data[,c(1,2)]
+  
+  spdf <- SpatialPointsDataFrame(coords = xy, data = data,
+                                 proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
+  
+  spdf2 <- sf::st_as_sf(spdf) # convert to sp object
+  
+  #=================================#
+  # do the same for sub-county data #
+  
+  subcounty_PCCstudies_data <- UGA_subcounties_tidy_subset
+  
+  if(year == 2011){
+    # make into an sf (spatial) object for joining
+    spdf_sc2 <- sfheaders::sf_polygon(
+      obj = subcounty_PCCstudies_data
+      , x = "long"
+      , y = "lat"
+      , polygon_id = "SNAME_2010"
+    )
+  }
+  
+  
+  if(year == 2015 || year == 2019){
+    # make into an sf (spatial) object for joining
+    
+    subcounty_PCCstudies_data <- with(subcounty_PCCstudies_data,  subcounty_PCCstudies_data[order(Subcounty) , ])
+    
+    spdf_sc2 <- sfheaders::sf_polygon(
+      obj = subcounty_PCCstudies_data
+      , x = "long"
+      , y = "lat"
+      , polygon_id = "Subcounty"
+    )
+  }
+  
+ sf::st_crs( spdf_sc2 ) <- 4326 # WGS84 (EPSG: 4326)
+  
+  
+  #=================================#
+  
+  master2 <- sf::st_join(spdf2, spdf_sc2) # join risk factor data and admin data
+  
+  master_lake <- sf::st_join(spdf2, spdf_sc2) # join risk factor data and admin data - this is for the lake data later
+  
+  # test average risk score
+ 
+  if(year == 2011){
+    master2$subcounty_factor_test <- as.factor(master2$SNAME_2010)
+  }
+  
+  if(year == 2015 || year == 2019){
+    master2$subcounty_factor_test <- as.factor(master2$Subcounty)
+  }
+  
+  sf::st_geometry(master2) <- NULL
+  
+  master3 <- master2 %>% tidyr::drop_na(value)
+  
+  # ================================#
+  # create risk scores per district #
+  risk_score <- master3 %>% 
+    group_by(subcounty_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value))
+  
+  mymode <- function(x) {
+    t <- table(x)
+    names(t)[ which.max(t) ]
+  }
+  
+  risk_score <- master3 %>% 
+    group_by(subcounty_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value),
+                     mode_risk = mymode(value))
+  
+  risk_score$mean_risk <- risk_score$risk/risk_score$n
+  
+  risk_score <- 
+    risk_score %>%
+    mutate(mean_risk_score = cut(mean_risk,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  risk_score <- 
+    risk_score %>%
+    mutate(mode_risk_score = cut(as.numeric(mode_risk),
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  #====================================================================================#
+  # WHERE >1 sub-county per district, calculate average risk score across sub-counties #
+  
+  # make original districts (2001) as sf sptail dataframe to merge
+  spdf_dist <- sf::st_as_sf(districts_2001)
+  spdf_dist <- sf::st_set_crs(spdf_dist, 4326)
+  
+  spdf_tojoin <- sf::st_as_sf(master_lake)
+  spdf_tojoin <- sf::st_set_crs(spdf_tojoin, 4326)
+  
+  master_dist <- sf::st_join(spdf_tojoin, spdf_dist)
+  
+  # test average risk score
+  
+  master_dist$district_factor_test <- as.factor(master_dist$DISTRICT)
+  
+  master_dist_tosave <- master_dist
+  
+  sf::st_geometry(master_dist) <- NULL
+  
+  master_dist2 <- master_dist %>% tidyr::drop_na(value)
+  
+  if(year == 2011){
+    master_dist2 <- master_dist2 %>% tidyr::drop_na(SNAME_2010)
+  }
+  
+  if(year == 2015 || year == 2019){
+    master_dist2 <- master_dist2 %>% tidyr::drop_na(Subcounty)
+  }
+  
+  # ================================#
+  # create risk scores per district #
+  risk_score_dist <- master_dist2 %>% 
+    group_by(district_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value))
+  
+  risk_score_dist <- master_dist2 %>% 
+    group_by(district_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value),
+                     mode_risk = mymode(value))
+  
+  risk_score_dist$mean_risk <- risk_score_dist$risk/risk_score_dist$n
+  
+  risk_score_dist <- 
+    risk_score_dist %>%
+    mutate(mean_risk_score = cut(mean_risk,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  risk_score_dist <- 
+    risk_score_dist %>%
+    mutate(mode_risk_score = cut(as.numeric(mode_risk),
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  #=========================================#
+  #          PLOTTING                       #
+  
+  value_rf <- c("grey90", "gold", "darkorchid1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
+  
+  # make labels (sub-counties with MDA) for plotting
+  risk_score_dist2 <- na.omit(risk_score_dist)
+  
+  dnames <- aggregate(cbind(x, y) ~ DISTRICT, data=master_dist2, FUN=mean)
+  dnames$label <- dnames$DISTRICT
+  dnames$risk_factor <- risk_score_dist2$mode_risk_score
+  dnames <- within(dnames,  label1 <- paste(DISTRICT, risk_factor, sep="; "))
+  dnames <- dnames %>% dplyr::rename(long = x, lat = y)
+  
+  if(year == 2011 || year == 2015 || year == 2019){
+    plot1 <- ggplot() +
+      geom_tile(data = RF_data_plotting, 
+                aes(x = x, y = y, fill = risk_fact_bins)) +
+      geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
+      geom_polygon(data= UGA_subcounties_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey), size = 1.2, fill=NA, alpha=NA)+
+      scale_fill_manual(name = "Class",
+                        values = value_rf, 
+                        na.value = NA, na.translate = FALSE)+
+      scale_colour_manual(values=c("black",NA), guide=FALSE)+
+      coord_equal() +
+      theme_bw() +
+      theme(panel.grid = element_blank(), 
+            axis.title = element_blank(), 
+            axis.text = element_blank(), 
+            axis.ticks = element_blank(),
+            panel.background = element_blank()) +
+      cowplot::panel_border(remove = TRUE) +
+      ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 2, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+    
+    plot2 <- ggplot() +
+      geom_tile(data = RF_data_plotting, 
+                aes(x = x, y = y, fill = risk_fact_bins)) +
+      geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
+      geom_polygon(data= UGA_subcounties_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey), size = 1.2, fill=NA, alpha=NA)+
+      scale_fill_manual(name = "Class",
+                        values = value_rf, 
+                        na.value = NA, na.translate = FALSE)+
+      scale_colour_manual(values=c("black",NA), guide=FALSE)+
+      coord_equal() +
+      theme_bw() +
+      theme(panel.grid = element_blank(), 
+            axis.title = element_blank(), 
+            axis.text = element_blank(), 
+            axis.ticks = element_blank(),
+            panel.background = element_blank()) +
+      cowplot::panel_border(remove = TRUE) +
+      ggrepel::geom_text_repel(data = dnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+    
+    
+    plot3 <- ggplot() +
+      geom_tile(data = RF_data_plotting, 
+                aes(x = x, y = y, fill = risk_fact_bins)) +
+      geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
+      geom_polygon(data= UGA_districts_tidy_subset, aes(x = long, y = lat, group = group), colour= "grey45", size = 1, alpha=0.25,fill=NA)+
+      geom_polygon(data= UGA_subcounties_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey), size = 1.2, fill=NA, alpha=NA, linetype = "longdash")+
+      scale_fill_manual(name = "Class",
+                        values = value_rf, 
+                        na.value = NA, na.translate = FALSE)+
+      scale_colour_manual(values=c("black",NA), guide=FALSE)+
+      coord_equal() +
+      theme_bw() +
+      theme(panel.grid = element_blank(), 
+            axis.title = element_blank(), 
+            axis.text = element_blank(), 
+            axis.ticks = element_blank(),
+            panel.background = element_blank()) +
+      cowplot::panel_border(remove = TRUE) +
+      ggrepel::geom_text_repel(data = dnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+    
+    
+  }
+  
+  return(list(risk_score, risk_score_dist, plot1, plot2, master2, master_lake, master_dist_tosave, dnames, plot3))
+  
+}
+
+
+#=============================================================================================#
+#    Risk factor analysis for sub-counties, exlcuding data points in water bodies: function   #
+
+average_risk_subcounties_func4 <- function(data_to_join, data_to_join2, RF_data_plotting, UGA_subcounties_tidy_subset, scnames, year){ 
+  
+  # ==========================================================================#
+  
+  # need to locate water bodies and remove co-ordinates from analysis for UGA #
+  
+  URL <- "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/physical/ne_50m_lakes.zip"
+  
+  fil <- basename(URL)
+  if (!file.exists(fil)) download.file(URL, fil)
+  fils <- unzip(fil)
+  lakes <- readOGR(grep("shp$", fils, value=TRUE), "ne_50m_lakes",
+                   stringsAsFactors=FALSE, verbose=FALSE)
+  
+  lakes_sf <- sf::st_as_sf(lakes) # make sf spatial object for joining
+  
+  lakes_sf2  <- lakes_sf  %>% dplyr::select(name, name_en) # just select name columns
+  
+  # ============================================================#
+  # 1) calculate score (minus water bodies) for each sub-county #
+  
+  master_lakes <- sf::st_join(data_to_join, lakes_sf2) # join the two sf objects
+  
+  master_lakes_filtered <- master_lakes %>% filter(!name %in% c("Lake Victoria", "Lake Albert","Lake Kyoga","Lake Edward")) # removes any observation including lakes
+  
+  # test average risk score
+ if(year == 2011){
+    master_lakes_filtered$subcounty_factor_test <- as.factor(master_lakes_filtered$SNAME_2010)
+  }
+  
+  if(year == 2015 || year == 2019){
+    master_lakes_filtered$subcounty_factor_test <- as.factor(master_lakes_filtered$Subcounty)
+  }
+  
+  sf::st_geometry(master_lakes_filtered) <- NULL
+  
+  master_lakes_filtered2 <- master_lakes_filtered %>% tidyr::drop_na(value)
+  
+  # create risk scores per sub-county
+  
+  risk_score_nolakes <- master_lakes_filtered2 %>% 
+    group_by(subcounty_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value))
+  
+  mymode <- function(x) {
+    t <- table(x)
+    names(t)[ which.max(t) ]
+  }
+  
+  risk_score_nolakes <- master_lakes_filtered2 %>% 
+    group_by(subcounty_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value),
+                     mode_risk = mymode(value))
+  
+  risk_score_nolakes$mean_risk <- risk_score_nolakes$risk/risk_score_nolakes$n
+  
+  risk_score_nolakes <- 
+    risk_score_nolakes %>%
+    mutate(mean_risk_score = cut(mean_risk,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  risk_score_nolakes <- 
+    risk_score_nolakes %>%
+    mutate(mode_risk_score = cut(as.numeric(mode_risk),
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  # =============================================================================#
+  # 2) calculate score (minus water bodies) for all sub-counties within dsitrict #
+  
+  master_lakes_district <- sf::st_join(data_to_join2, lakes_sf2) # join the two sf objects
+  
+  master_lakes_district_filtered <- master_lakes_district %>% filter(!name %in% c("Lake Victoria", "Lake Albert","Lake Kyoga","Lake Edward")) # removes any observation including lakes
+  
+  # test average risk score
+  #master_lakes_district_filtered$district_factor_test <- as.factor(master_lakes_district_filtered$DISTRICT)
+  
+  sf::st_geometry(master_lakes_district_filtered) <- NULL
+  
+  master_lakes_district_filtered2 <- master_lakes_district_filtered %>% tidyr::drop_na(value)
+  
+ if(year == 2011){
+    master_lakes_district_filtered2 <- master_lakes_district_filtered2 %>% tidyr::drop_na(SNAME_2010)
+  }
+  
+  if(year == 2015 || year == 2019){
+    master_lakes_district_filtered2 <- master_lakes_district_filtered2 %>% tidyr::drop_na(Subcounty)
+  }
+  
+  # create risk scores per sub-county
+  
+  risk_score_district_nolakes <- master_lakes_district_filtered2 %>% 
+    group_by(district_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value))
+  
+  
+  risk_score_district_nolakes <- master_lakes_district_filtered2  %>% 
+    group_by(district_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value),
+                     mode_risk = mymode(value))
+  
+  risk_score_district_nolakes$mean_risk <- risk_score_district_nolakes$risk/risk_score_district_nolakes$n
+  
+  risk_score_district_nolakes <- 
+    risk_score_district_nolakes %>%
+    mutate(mean_risk_score = cut(mean_risk,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  risk_score_district_nolakes <- 
+    risk_score_district_nolakes %>%
+    mutate(mode_risk_score = cut(as.numeric(mode_risk),
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  
+  # for plotting the lakes # 
+  lakes_UGA <- lakes_sf %>% dplyr::select(name, name_en)
+  
+  lakes_UGA <- lakes_UGA %>% filter(name %in% c("Lake Victoria", "Lake Albert","Lake Kyoga","Lake Edward"))
+  
+  value_rf <- c("grey90", "gold", "darkorchid1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
+  
+ if(year == 2011 || year == 2015 || year == 2019){
+    plot1 <- ggplot() +
+      geom_tile(data = RF_data_plotting, 
+                aes(x = x, y = y, fill = risk_fact_bins)) +
+      geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
+      geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue") + 
+      geom_polygon(data= UGA_subcounties_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey), size = 1.1, fill=NA, alpha=NA)+
+      scale_fill_manual(name = "Class",
+                        values = value_rf, 
+                        na.value = NA, na.translate = FALSE)+
+      scale_colour_manual(values=c("black",NA), guide=FALSE)+
+      coord_equal() +
+      theme_bw() +
+      theme(panel.grid = element_blank(), 
+            axis.title = element_blank(), 
+            axis.text = element_blank(), 
+            axis.ticks = element_blank(),
+            panel.background = element_blank()) +
+      cowplot::panel_border(remove = TRUE) +
+      ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 2.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+      coord_sf(xlim = c(29.83, 35.1), ylim = c(-1.5, 4.32))
+  }
+  
+  # make NEW labels (sub-counties across districts with MDA) for plotting
+  risk_score_nolakes_dist2 <- na.omit(risk_score_district_nolakes)
+  
+  dnames2 <- aggregate(cbind(x, y) ~ DISTRICT, data=master_lakes_district_filtered2, FUN=mean)
+  dnames2$label <- dnames2$DISTRICT
+  dnames2$risk_factor <- risk_score_nolakes_dist2$mode_risk_score
+  dnames2 <- within(dnames2,  label1 <- paste(DISTRICT, risk_factor, sep="; "))
+  dnames2 <- dnames2 %>% dplyr::rename(long = x, lat = y)
+  
+  plot2 <- ggplot() +
+    geom_tile(data = RF_data_plotting, 
+              aes(x = x, y = y, fill = risk_fact_bins)) +
+    geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
+    geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue") + 
+    geom_polygon(data= UGA_subcounties_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey), size = 1.1, fill=NA, alpha=NA)+
+    scale_fill_manual(name = "Class",
+                      values = value_rf, 
+                      na.value = NA, na.translate = FALSE)+
+    scale_colour_manual(values=c("black",NA), guide=FALSE)+
+    coord_equal() +
+    theme_bw() +
+    theme(panel.grid = element_blank(), 
+          axis.title = element_blank(), 
+          axis.text = element_blank(), 
+          axis.ticks = element_blank(),
+          panel.background = element_blank()) +
+    cowplot::panel_border(remove = TRUE) +
+    ggrepel::geom_text_repel(data = dnames2, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+    coord_sf(xlim = c(29.83, 35.1), ylim = c(-1.5, 4.32))
+  
+  
+  return(list(risk_score_nolakes, plot1, risk_score_district_nolakes, plot2, dnames2))
+  
+}

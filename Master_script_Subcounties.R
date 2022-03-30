@@ -168,6 +168,9 @@ risk_fact_subcounties_nowater_object_2004[[3]]
 risk_fact_subcounties_nowater_object_2004[[4]]
 risk_fact_subcounties_nowater_object_2004[[5]]
 
+#write.csv(risk_fact_subcounties_nowater_object_2004[[1]],"subdistrict_2004.csv", row.names = FALSE)
+#write.csv(risk_fact_subcounties_nowater_object_2004[[3]],"avgsubdistrict_2004.csv", row.names = FALSE)
+
 # ============================ #
 # for 2012 MDA sub-county data #
 
@@ -207,6 +210,8 @@ risk_fact_subcounties_nowater_object_2012[[3]]
 risk_fact_subcounties_nowater_object_2012[[4]]
 risk_fact_subcounties_nowater_object_2012[[5]]
 
+#write.csv(risk_fact_subcounties_nowater_object_2012[[1]],"subdistrict_2012.csv", row.names = FALSE)
+#write.csv(risk_fact_subcounties_nowater_object_2012[[3]],"avgsubdistrict_2012.csv", row.names = FALSE)
 
 # ============================ #
 # for 2015 MDA sub-county data #
@@ -251,6 +256,8 @@ risk_fact_subcounties_nowater_object_2015[[3]]
 risk_fact_subcounties_nowater_object_2015[[4]]
 risk_fact_subcounties_nowater_object_2015[[5]]
 
+#write.csv(risk_fact_subcounties_nowater_object_2015[[1]],"subdistrict_2015.csv", row.names = FALSE)
+#write.csv(risk_fact_subcounties_nowater_object_2015[[3]],"avgsubdistrict_2015.csv", row.names = FALSE)
 
 # ============================ #
 # for 2016 MDA sub-county data #
@@ -293,6 +300,9 @@ risk_fact_subcounties_nowater_object_2016[[3]]
 risk_fact_subcounties_nowater_object_2016[[4]]
 risk_fact_subcounties_nowater_object_2016[[5]]
 
+#write.csv(risk_fact_subcounties_nowater_object_2016[[1]],"subdistrict_2016.csv", row.names = FALSE)
+#write.csv(risk_fact_subcounties_nowater_object_2016[[3]],"avgsubdistrict_2016.csv", row.names = FALSE)
+
 # ============================ #
 # for 2018 MDA sub-county data #
 
@@ -334,3 +344,6 @@ risk_fact_subcounties_nowater_object_2018[[3]]
 risk_fact_subcounties_nowater_object_2018[[4]]
 risk_fact_subcounties_nowater_object_2018[[5]]
 risk_fact_subcounties_nowater_object_2018[[6]]
+
+#write.csv(risk_fact_subcounties_nowater_object_2018[[1]],"subdistrict_2018.csv", row.names = FALSE)
+#write.csv(risk_fact_subcounties_nowater_object_2018[[3]],"avgsubdistrict_2018.csv", row.names = FALSE)
