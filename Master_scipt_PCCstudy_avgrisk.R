@@ -122,7 +122,7 @@ overlay_2011 <- plotting_overlays_func(risk_factor1 = sanitation_2011[[3]], risk
 # second: calculate avg. risk by sub-county & plot
 risk_fact_subcounties_object_2011 <- average_risk_subcounties_func3(RF_data = overlay_2011[[3]], subcounties = subcounties_2010_sp, 
                                                                    subcounty_PCCstudies_data = subcounties_PCCstudies_object_2011[[1]], 
-                                                                   scnames = subcounties_PCCstudies_object_2011[[4]], 
+                                                                   scnames = , 
                                                                    UGA_subcounties_tidy_subset = subcounties_PCCstudies_object_2011[[5]], 
                                                                    UGA_subcounties_tidy = subcounties_PCCstudies_object_2011[[1]], 
                                                                    UGA_districts_tidy_subset = subcounties_PCCstudies_object_2011[[6]],
@@ -195,7 +195,6 @@ risk_fact_subcounties_nowater_object_2015[[5]]
 # for 2019 PCC sub-county data #
 
 # first: need to call & produce risk factor overlay 
-
 
 overlay_2016 <- plotting_overlays_func(risk_factor1 = sanitation_2016[[3]], risk_factor2 = pig_populationFAO[[1]],
                                        risk_factor3 = poverty_lowest40_2016[[3]],

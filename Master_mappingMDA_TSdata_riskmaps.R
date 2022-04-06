@@ -92,6 +92,26 @@ avg.risk.map_2011 <- plot_UGA_avg.risk.zones_func(Uganda_dist = Uganda_dist,
 plot(avg.risk.map_2011[[1]]) # mean risk scores not useful
 plot(avg.risk.map_2011[[2]]) # therefore only plot modal risk scores
 
+#======================================================================#
+# 2c) Calculating average risk score per district (minus water bodies) #
+
+PCC_average_riskscores_distr_2011_nowater_df <- calculate_risk_scores_districts_func2(data = overlay_2011[[3]], year = "2011",
+                                                                              data_to_join = PCC_average_riskscores_distr_2011_df[[3]])
+
+Avg.risk_newdistr_nowater_2011 <- PCC_average_riskscores_distr_2011_nowater_df[[1]]
+Avg.risk_originaldistr_nowater_2011 <- PCC_average_riskscores_distr_2011_nowater_df[[2]]
+
+#write.csv(Avg.risk_originaldistr_nowater_2011, file="Avg.risk_originaldistr_nowater_2011.csv")
+
+#=============================================== #
+#   Make district centorids &  risk zones labels #
+
+avg.risk.map.water_2011 <- plot_UGA_avg.risk.zones_func2(Uganda_dist = Uganda_dist, 
+                                                  risk_overlay = Avg.risk_originaldistr_nowater_2011, 
+                                                  risk_map = overlay_2011[[2]])
+
+plot(avg.risk.map.water_2011[[1]]) # mean risk scores not useful
+plot(avg.risk.map.water_2011[[2]]) # therefore only plot modal risk scores
 
 #=====================================#
 #               2001                  #
@@ -130,6 +150,26 @@ avg.risk.map_2001 <- plot_UGA_avg.risk.zones_func(Uganda_dist = Uganda_dist,
 plot(avg.risk.map_2001[[1]]) # mean risk scores not useful
 plot(avg.risk.map_2001[[2]]) # therefore only plot modal risk scores
 
+#======================================================================#
+# 2c) Calculating average risk score per district (minus water bodies) #
+
+PCC_average_riskscores_distr_2001_nowater_df <- calculate_risk_scores_districts_func2(data = overlay_2001[[3]], year = "2001",
+                                                                                      data_to_join = PCC_average_riskscores_distr_2001_df[[3]])
+
+Avg.risk_newdistr_nowater_2001 <- PCC_average_riskscores_distr_2001_nowater_df[[1]]
+Avg.risk_originaldistr_nowater_2001 <- PCC_average_riskscores_distr_2001_nowater_df[[2]]
+
+#write.csv(Avg.risk_originaldistr_nowater_2001, file="Avg.risk_originaldistr_nowater_2001.csv")
+
+#=============================================== #
+#   Make district centorids &  risk zones labels #
+
+avg.risk.map.water_2001 <- plot_UGA_avg.risk.zones_func2(Uganda_dist = Uganda_dist, 
+                                                         risk_overlay = Avg.risk_originaldistr_nowater_2001, 
+                                                         risk_map = overlay_2001[[2]])
+
+plot(avg.risk.map.water_2001[[1]]) # mean risk scores not useful
+plot(avg.risk.map.water_2001[[2]]) # therefore only plot modal risk scores
 
 #=====================================#
 #               2006                  #
@@ -168,6 +208,27 @@ avg.risk.map_2006 <- plot_UGA_avg.risk.zones_func(Uganda_dist = Uganda_dist,
 plot(avg.risk.map_2006[[1]]) # mean risk scores not useful
 plot(avg.risk.map_2006[[2]]) # therefore only plot modal risk scores
 
+#======================================================================#
+# 2c) Calculating average risk score per district (minus water bodies) #
+
+PCC_average_riskscores_distr_2006_nowater_df <- calculate_risk_scores_districts_func2(data = overlay_2006[[3]], year = "2006",
+                                                                                      data_to_join = PCC_average_riskscores_distr_2006_df[[3]])
+
+Avg.risk_newdistr_nowater_2006 <- PCC_average_riskscores_distr_2006_nowater_df[[1]]
+Avg.risk_originaldistr_nowater_2006 <- PCC_average_riskscores_distr_2006_nowater_df[[2]]
+
+#write.csv(Avg.risk_originaldistr_nowater_2006, file="Avg.risk_originaldistr_nowater_2006.csv")
+
+#=============================================== #
+#   Make district centorids &  risk zones labels #
+
+avg.risk.map.water_2006 <- plot_UGA_avg.risk.zones_func2(Uganda_dist = Uganda_dist, 
+                                                         risk_overlay = Avg.risk_originaldistr_nowater_2006, 
+                                                         risk_map = overlay_2006[[2]])
+
+plot(avg.risk.map.water_2006[[1]]) # mean risk scores not useful
+plot(avg.risk.map.water_2006[[2]]) # therefore onl
+
 #=====================================#
 #               2016                  #
 
@@ -204,6 +265,27 @@ avg.risk.map_2016 <- plot_UGA_avg.risk.zones_func(Uganda_dist = Uganda_dist,
 
 plot(avg.risk.map_2016[[1]]) # mean risk scores not useful
 plot(avg.risk.map_2016[[2]]) # therefore only plot modal risk scores
+
+#======================================================================#
+# 2c) Calculating average risk score per district (minus water bodies) #
+
+PCC_average_riskscores_distr_2016_nowater_df <- calculate_risk_scores_districts_func2(data = overlay_2016[[3]], year = "2016",
+                                                                                      data_to_join = PCC_average_riskscores_distr_2016_df[[3]])
+
+Avg.risk_newdistr_nowater_2016 <- PCC_average_riskscores_distr_2016_nowater_df[[1]]
+Avg.risk_originaldistr_nowater_2016 <- PCC_average_riskscores_distr_2016_nowater_df[[2]]
+
+#write.csv(Avg.risk_originaldistr_nowater_2016, file="Avg.risk_originaldistr_nowater_2016.csv")
+
+#=============================================== #
+#   Make district centorids &  risk zones labels #
+
+avg.risk.map.water_2016 <- plot_UGA_avg.risk.zones_func2(Uganda_dist = Uganda_dist, 
+                                                         risk_overlay = Avg.risk_originaldistr_nowater_2016, 
+                                                         risk_map = overlay_2016[[2]])
+
+plot(avg.risk.map.water_2016[[1]]) # mean risk scores not useful
+plot(avg.risk.map.water_2016[[2]]) # therefore onl
 
 
 #===================================================================================================================================#

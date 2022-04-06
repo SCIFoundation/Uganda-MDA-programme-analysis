@@ -2400,7 +2400,7 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
   if (PCC_survey_year == 2019){
     
     PCCstudy_subcounties <-
-      c("PAJULU","LAMOGI","URIAMA") 
+      c("PAJULU","LAMOGI","UNYAMA") 
     
     sc_names # copy variable (dist names) : UGA_dist_MDA_names <- district_names 
     

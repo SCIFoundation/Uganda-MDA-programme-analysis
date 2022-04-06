@@ -76,7 +76,7 @@ plotting_overlays_func <- function(risk_factor1, risk_factor2, risk_factor3, adm
   # discrete color gradient from continous color gradient in ggplot: https://stackoverflow.com/questions/64762377/create-r-ggplot2-discrete-colour-palette-for-gradient-map-with-continuous-values
   # convert cont to discrete : https://www.r-bloggers.com/2020/09/how-to-convert-continuous-variables-into-categorical-by-creating-bins/
   
-  value_rf <- c("grey90", "gold", "royalblue1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
+  value_rf <- c("grey90", "gold", "darkorchid1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
   
   b <- ggplot() +
     geom_tile(data = riskfact_df, 
@@ -127,8 +127,7 @@ processing_admin_data_func <- function(admin) {
 calculate_risk_scores_districts_func <- function(data, year) {
 
   # Approach see: https://stackoverflow.com/questions/64229997/using-latitude-and-longitude-information-to-assign-locations-to-districts-in-afg
-data<- overlay_2001[[3]]
-  
+
   # extract lat and longitutdes
   data$long <- data$x
   data$lat <- data$y
@@ -154,6 +153,8 @@ master2 <- sf::st_join(spdf2, UGA_districts_data) # join risk factor data and ad
 
 # test average risk score
 master2$district_factor_test <- as.factor(master2$name)
+
+master_to_save <- master2
 
 sf::st_geometry(master2) <- NULL
 
@@ -354,8 +355,284 @@ if(year == "2016"){
   risk_score2a$year <- "2016-2020"
 }
 
-return(list(risk_score, risk_score2a))
+return(list(risk_score, risk_score2a, master_to_save))
 
+}
+
+
+#=========================================================================#
+#      Function: calculating avg. risk scores - minus water bodies        #
+
+calculate_risk_scores_districts_func2 <- function(data, year, data_to_join) {
+  
+  # Approach see: https://stackoverflow.com/questions/64229997/using-latitude-and-longitude-information-to-assign-locations-to-districts-in-afg
+  #data<- overlay_2001[[3]]
+  
+  # # extract lat and longitutdes
+  # data$long <- data$x
+  # data$lat <- data$y
+  # 
+  # # get distirct co-ordinates to match 
+  # 
+  # UGA_districts_data <- rnaturalearth::ne_states(country = 'Uganda', 
+  #                                                returnclass = 'sf') %>%
+  #   dplyr::select(name, name_en)
+  # 
+  # UGA_districts_data <- rnaturalearth::ne_states(country = 'Uganda', 
+  #                                                returnclass = 'sf') 
+  # 
+  # # make lat & lon dataframe into spatial object (sp)
+  # xy <- data[,c(1,2)]
+  # 
+  # spdf <- SpatialPointsDataFrame(coords = xy, data = data,
+  #                                proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
+  # 
+  # spdf2 <- sf::st_as_sf(spdf) # convert to sp object
+  # 
+  # master2 <- sf::st_join(spdf2, UGA_districts_data) # join risk factor data and admin data
+  # 
+  # # test average risk score
+  # master2$district_factor_test <- as.factor(master2$name)
+  # 
+  # sf::st_geometry(master2) <- NULL
+  # 
+  # master3 <- master2 %>% tidyr::drop_na(value)
+  
+  # ==========================================================================#
+  # need to locate water bodies and remove co-ordinates from analysis for UGA #
+  
+  URL <- "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/physical/ne_50m_lakes.zip"
+  
+  fil <- basename(URL)
+  if (!file.exists(fil)) download.file(URL, fil)
+  fils <- unzip(fil)
+  lakes <- readOGR(grep("shp$", fils, value=TRUE), "ne_50m_lakes",
+                   stringsAsFactors=FALSE, verbose=FALSE)
+  
+  lakes_sf <- sf::st_as_sf(lakes) # make sf spatial object for joining
+  
+  lakes_sf2  <- lakes_sf  %>% dplyr::select(name, name_en) # just select name columns
+  
+  # =============================================================================#
+  # 2) calculate score (minus water bodies) for all sub-counties within dsitrict #
+  
+  master_lakes_district <- sf::st_join(data_to_join, lakes_sf2) # join the two sf objects
+  
+  master_lakes_district_filtered <- master_lakes_district %>% filter(!name.y %in% c("Lake Victoria", "Lake Albert","Lake Kyoga","Lake Edward")) # removes any observation including lakes
+  
+  # test average risk score
+  #master_lakes_district_filtered$district_factor_test <- as.factor(master_lakes_district_filtered$DISTRICT)
+  
+  sf::st_geometry(master_lakes_district_filtered) <- NULL
+  
+  master_lakes_district_filtered2 <- master_lakes_district_filtered %>% tidyr::drop_na(value)
+  
+  # if(year == 2011){
+  #   master_lakes_district_filtered2 <- master_lakes_district_filtered2 %>% tidyr::drop_na(SNAME_2010)
+  # }
+  # 
+  # if(year == 2015 || year == 2019){
+  #   master_lakes_district_filtered2 <- master_lakes_district_filtered2 %>% tidyr::drop_na(Subcounty)
+  # }
+  # 
+
+  # create risk scores per district
+  risk_score_dist_nolakes <- master_lakes_district_filtered2 %>% 
+    group_by(district_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value))
+  
+  mymode <- function(x) {
+    t <- table(x)
+    names(t)[ which.max(t) ]
+  }
+  
+  risk_score_dist_nolakes <- master_lakes_district_filtered2 %>% 
+    group_by(district_factor_test) %>% 
+    dplyr::summarise(n = n(), risk = sum(value),
+                     mode_risk = mymode(value))
+  
+  risk_score_dist_nolakes$mean_risk <- risk_score_dist_nolakes$risk/risk_score_dist_nolakes$n
+  
+  risk_score_dist_nolakes <- 
+    risk_score_dist_nolakes %>%
+    mutate(mean_risk_score = cut(mean_risk,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  risk_score_dist_nolakes <- 
+    risk_score_dist_nolakes %>%
+    mutate(mode_risk_score = cut(as.numeric(mode_risk),
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  #write.csv(risk_score,'risk_score_2006.csv')
+  
+  # ======================================================================= #
+  # recode newly created districts (since 2002) to ORIGINAL district names  #
+  risk_score_dist_nolakes$recoded_districts <- recode_factor(risk_score_dist_nolakes$district_factor_test, 
+                                                "Abim" = "Kotido", "Adjumani" = "Adjumani", 
+                                                "Agago" = "Pader", "Alebtong" = "Lira", "Amolatar" = "Lira",
+                                                "Amudat" = "Nakapiripirit", "Amuria" = "Katakwi",
+                                                "Amuru" = "Gulu", "Apac" = "Apac", "Arua" = "Arua", 
+                                                "Budaka" = "Pallisa", "Bududa" = "Mbale", "Bugiri" = "Bugiri",
+                                                "Buhweju" = "Bushenyi", "Buikwe" = "Mukono", "Bukedea" = "Kumi",
+                                                "Bukomansimbi" = "Masaka", "Bukwa" = "Kapchorwa", 
+                                                "Bulambuli" = "Sironko", "Buliisa" = "Masindi", 
+                                                "Bundibugyo" = "Bundibugyo", "Bushenyi" = "Bushenyi",
+                                                "Busia" = "Busia", "Butaleja" = "Tororo", "Butambala" = "Mpigi",
+                                                "Buvuma" = "Mukono", "Buyende" = "Kamuli", "Dokolo" = "Lira",
+                                                "Gomba" = "Mpigi", "Gulu" = "Gulu", "Hoima" = "Hoima",
+                                                "Ibanda" = "Mbarara", "Iganga" = "Iganga", "Isingiro" = "Mbarara",
+                                                "Jinja" = "Jinja", "Kaabong" = "Kotido", "Kabale" = "Kabale",
+                                                "Kabarole" = "Kabarole", "Kaberamaido" = "Kaberamaido",
+                                                "Kalangala" = "Kalangala", "Kaliro" = "Kamuli", "Kalungu" = "Masaka",
+                                                "Kampala" = "Kampala", "Kamuli" = "Kamuli", "Kamwenge" = "Kamwenge",
+                                                "Kanungu" = "Kanungu", "Kapchorwa" = "Kapchorwa", "Kasese" = "Kasese",
+                                                "Katakwi" = "Katakwi", "Kayunga" = "Kayunga", "Kibale" = "Kibale",
+                                                "Kiboga" = "Kiboga", "Kibuku" = "Pallisa", "Kiryandongo" = "Masindi",
+                                                "Kisoro" = "Kisoro", "Kitgum" = "Kitgum", "Koboko" = "Arua",
+                                                "Kole" = "Apac", "Kotido" = "Kotido", "Kumi" = "Kumi", "Kween" = "Kapchorwa",
+                                                "Kyankwanzi" = "Kiboga", "Kyegegwa" = "Kyenjojo", "Kyenjojo" = "Kyenjojo",
+                                                "Lamwo" = "Kitgum", "Lira" = "Lira", "Luuka" = "Iganga", "Luweero" = "Luweero",
+                                                "Lwengo" = "Masaka", "Lyantonde" = "Rakai", "Manafwa" = "Mbale", 
+                                                "Maracha" = "Arua", "Masaka" = "Masaka", "Masindi" = "Masindi", "Mayuge" = "Mayuge",
+                                                "Mbale" = "Mbale", "Mbarara" = "Mbarara", "Mitooma" = "Bushenyi",
+                                                "Mityana" = "Mubende", "Moroto" = "Moroto", "Moyo" = "Moyo", "Mpigi" = "Mpigi",
+                                                "Mubende" = "Mubende", "Mukono" = "Mukono", "Nakapiripirit" = "Nakapiripirit",
+                                                "Nakaseke" = "Luweero", "Nakasongola" = "Nakasongola", "Namayingo" = "Bugiri",
+                                                "Namutumba" = "Iganga", "Napak" = "Moroto", "Nebbi" = "Nebbi", "Ngora" = "Kumi",
+                                                "Ntoroko" = "Bundibugyo", "Ntungamo" = "Ntungamo", "Nwoya" = "Gulu", 
+                                                "Otuke" = "Lira", "Oyam" = "Apac", "Pader" = "Pader", "Pallisa" = "Pallisa",
+                                                "Rakai" = "Rakai", "Rubirizi" = "Bushenyi", "Rukungiri" = "Rukungiri", 
+                                                "Sembabule" = "Sembabule", "Serere" = "Soroti", "Sheema" = "Bushenyi",
+                                                "Sironko" = "Sironko", "Soroti" = "Soroti", "Tororo" = "Tororo",
+                                                "Wakiso" = "Wakiso", "Yumbe" = "Yumbe", "Zombo" = "Nebbi")
+  # sort districts alphabetically
+  risk_score_dist_nolakes <- as.data.frame(risk_score_dist_nolakes)
+  
+  risk_score_dist_nolakes$recoded_districts_chr <- as.character(risk_score_dist_nolakes$recoded_districts) #need factor col as character to re-arrange alphabetically
+  
+  risk_score_dist_nolakes <- risk_score_dist_nolakes  %>% arrange(recoded_districts_chr)
+  
+  # add year factor
+  if(year == "2011"){
+    risk_score_dist_nolakes$year <- "2011-2015"
+  }
+  
+  if(year == "2001"){
+    risk_score_dist_nolakes$year <- "2001-2005"
+  }
+  
+  if(year == "2006"){
+    risk_score_dist_nolakes$year <- "2006-2010"
+  }
+  
+  if(year == "2016"){
+    risk_score_dist_nolakes$year <- "2016-2020"
+  }
+  
+  # ================================= #
+  # create risk scores per district   #
+  master_lakes_district_filtered2_olddistr <- master_lakes_district_filtered2
+  
+  master_lakes_district_filtered2_olddistr$recoded_districts <- recode_factor(master_lakes_district_filtered2_olddistr$district_factor_test, 
+                                                      "Abim" = "Kotido", "Adjumani" = "Adjumani", 
+                                                      "Agago" = "Pader", "Alebtong" = "Lira", "Amolatar" = "Lira",
+                                                      "Amudat" = "Nakapiripirit", "Amuria" = "Katakwi",
+                                                      "Amuru" = "Gulu", "Apac" = "Apac", "Arua" = "Arua", 
+                                                      "Budaka" = "Pallisa", "Bududa" = "Mbale", "Bugiri" = "Bugiri",
+                                                      "Buhweju" = "Bushenyi", "Buikwe" = "Mukono", "Bukedea" = "Kumi",
+                                                      "Bukomansimbi" = "Masaka", "Bukwa" = "Kapchorwa", 
+                                                      "Bulambuli" = "Sironko", "Buliisa" = "Masindi", 
+                                                      "Bundibugyo" = "Bundibugyo", "Bushenyi" = "Bushenyi",
+                                                      "Busia" = "Busia", "Butaleja" = "Tororo", "Butambala" = "Mpigi",
+                                                      "Buvuma" = "Mukono", "Buyende" = "Kamuli", "Dokolo" = "Lira",
+                                                      "Gomba" = "Mpigi", "Gulu" = "Gulu", "Hoima" = "Hoima",
+                                                      "Ibanda" = "Mbarara", "Iganga" = "Iganga", "Isingiro" = "Mbarara",
+                                                      "Jinja" = "Jinja", "Kaabong" = "Kotido", "Kabale" = "Kabale",
+                                                      "Kabarole" = "Kabarole", "Kaberamaido" = "Kaberamaido",
+                                                      "Kalangala" = "Kalangala", "Kaliro" = "Kamuli", "Kalungu" = "Masaka",
+                                                      "Kampala" = "Kampala", "Kamuli" = "Kamuli", "Kamwenge" = "Kamwenge",
+                                                      "Kanungu" = "Kanungu", "Kapchorwa" = "Kapchorwa", "Kasese" = "Kasese",
+                                                      "Katakwi" = "Katakwi", "Kayunga" = "Kayunga", "Kibale" = "Kibale",
+                                                      "Kiboga" = "Kiboga", "Kibuku" = "Pallisa", "Kiryandongo" = "Masindi",
+                                                      "Kisoro" = "Kisoro", "Kitgum" = "Kitgum", "Koboko" = "Arua",
+                                                      "Kole" = "Apac", "Kotido" = "Kotido", "Kumi" = "Kumi", "Kween" = "Kapchorwa",
+                                                      "Kyankwanzi" = "Kiboga", "Kyegegwa" = "Kyenjojo", "Kyenjojo" = "Kyenjojo",
+                                                      "Lamwo" = "Kitgum", "Lira" = "Lira", "Luuka" = "Iganga", "Luweero" = "Luweero",
+                                                      "Lwengo" = "Masaka", "Lyantonde" = "Rakai", "Manafwa" = "Mbale", 
+                                                      "Maracha" = "Arua", "Masaka" = "Masaka", "Masindi" = "Masindi", "Mayuge" = "Mayuge",
+                                                      "Mbale" = "Mbale", "Mbarara" = "Mbarara", "Mitooma" = "Bushenyi",
+                                                      "Mityana" = "Mubende", "Moroto" = "Moroto", "Moyo" = "Moyo", "Mpigi" = "Mpigi",
+                                                      "Mubende" = "Mubende", "Mukono" = "Mukono", "Nakapiripirit" = "Nakapiripirit",
+                                                      "Nakaseke" = "Luweero", "Nakasongola" = "Nakasongola", "Namayingo" = "Bugiri",
+                                                      "Namutumba" = "Iganga", "Napak" = "Moroto", "Nebbi" = "Nebbi", "Ngora" = "Kumi",
+                                                      "Ntoroko" = "Bundibugyo", "Ntungamo" = "Ntungamo", "Nwoya" = "Gulu", 
+                                                      "Otuke" = "Lira", "Oyam" = "Apac", "Pader" = "Pader", "Pallisa" = "Pallisa",
+                                                      "Rakai" = "Rakai", "Rubirizi" = "Bushenyi", "Rukungiri" = "Rukungiri", 
+                                                      "Sembabule" = "Sembabule", "Serere" = "Soroti", "Sheema" = "Bushenyi",
+                                                      "Sironko" = "Sironko", "Soroti" = "Soroti", "Tororo" = "Tororo",
+                                                      "Wakiso" = "Wakiso", "Yumbe" = "Yumbe", "Zombo" = "Nebbi")
+  #levels(master3_olddistr$recoded_districts)
+  risk_score_dist_nolakes2 <- master_lakes_district_filtered2_olddistr %>% 
+    group_by(recoded_districts) %>% 
+    dplyr::summarise(n = n(), risk = sum(value))
+  
+  risk_score_dist_nolakes2 <- master_lakes_district_filtered2_olddistr %>% 
+    group_by(recoded_districts) %>% 
+    dplyr::summarise(n = n(), risk = sum(value),
+                     median_risk = median(value),
+                     mode_risk = mymode(value))
+  
+  risk_score_dist_nolakes2$mean_risk <- risk_score_dist_nolakes2$risk/risk_score_dist_nolakes2$n
+  
+  risk_score_dist_nolakes2 <- 
+    risk_score_dist_nolakes2 %>%
+    mutate(mean_risk_score = cut(mean_risk,
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  risk_score_dist_nolakes2 <- 
+    risk_score_dist_nolakes2 %>%
+    mutate(median_risk_score = cut(median_risk,
+                                   breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                   labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  # mode provides best average description with large samples (i.e. all RF values accross a district)
+  risk_score_dist_nolakes2 <- 
+    risk_score_dist_nolakes2 %>%
+    mutate(mode_risk_score = cut(as.numeric(mode_risk),
+                                 breaks = c(0, 0.99, 1.0099, 1.099, 2.0099, 2.099, 2.1099, 3.1099, 3.12), right = FALSE,
+                                 labels = c('all low','A' , 'B', 'C', 'AB', 'AC', 'BC', 'ABC')))
+  
+  # further editing 
+  risk_score_dist_nolakes2a <- slice(risk_score_dist_nolakes2, 1:(n() - 1))  # remove final row (NA)
+  
+  # sort districts alphabetically
+  risk_score_dist_nolakes2a <- as.data.frame(risk_score_dist_nolakes2a)
+  
+  risk_score_dist_nolakes2a$recoded_districts_chr <- as.character(risk_score_dist_nolakes2a$recoded_districts) #need factor col as character to re-arrange alphabetically
+  
+  risk_score_dist_nolakes2a <- risk_score_dist_nolakes2a  %>% arrange(recoded_districts_chr)
+  
+  if(year == "2011"){
+    risk_score_dist_nolakes2a$year <- "2011-2015"
+  }
+  
+  if(year == "2001"){
+    risk_score_dist_nolakes2a$year <- "2001-2005"
+  }
+  
+  if(year == "2006"){
+    risk_score_dist_nolakes2a$year <- "2006-2010"
+  }
+  
+  if(year == "2016"){
+    risk_score_dist_nolakes2a$year <- "2016-2020"
+  }
+  
+  return(list(risk_score_dist_nolakes, risk_score_dist_nolakes2a))
+  
 }
 
 
@@ -409,88 +686,82 @@ risk_map2 <-
   risk_map +
   ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
 
+
 return(list(risk_map1, risk_map2))
 
-# 
-# Uganda_2011_master %>%
-#   dplyr::mutate(X_nudge = dplyr::case_when(recoded_districts == 'Kotido' ~ 2
-#                                            ,recoded_districts == 'Adjumani' ~ .5
-#                                            ,recoded_districts == 'Pader' ~ 2
-#                                            ,recoded_districts == 'Lira' ~ 0
-#                                            ,recoded_districts == 'Nakapiripirit' ~ 1.3
-#                                            #,recoded_districts == 'Katakwi' ~ 0
-#                                            #,recoded_districts == 'Gulu' ~ 0
-#                                            #,recoded_districts == 'Apac' ~ 0
-#                                            ,recoded_districts == 'Arua' ~ -10
-#                                            ,recoded_districts == 'Pallisa' ~ 3
-#                                            ,recoded_districts == 'Yumbe' ~ -10
-#                                            ,TRUE ~ 0)
-#                 ,y_nudge = dplyr::case_when(recoded_districts == 'Kotido' ~ 1
-#                                             ,recoded_districts == 'Adjumani' ~ 3
-#                                             ,recoded_districts == 'Pader' ~ 2
-#                                             ,recoded_districts == 'Lira' ~ .25
-#                                             ,recoded_districts == 'Nakapiripirit' ~ .1
-#                                             #,recoded_districts == 'Katakwi' ~ 0
-#                                             #,recoded_districts == 'Gulu' ~ 0
-#                                             #,recoded_districts == 'Apac' ~ 0
-#                                             ,recoded_districts == 'Arua' ~ 0
-#                                             ,recoded_districts == 'Pallisa' ~ 0.25
-#                                             ,recoded_districts == 'Yumbe' ~ 0
-#                                             ,TRUE ~ 0)
-#   ) -> Uganda_2011_master
-# 
-# 
-# 
-# 
-# 
-# Risk_map_2011 +
-# geom_text_repel(data = Uganda_2011_master
-#                 ,aes(x = lon
-#                      ,y = lat
-#                      ,label = label
-#                 )
-#                 ,family = 'Avenir'
-#                 ,nudge_x = Uganda_2011_master$x_nudge
-#                 ,nudge_y = Uganda_2011_master$y_nudge
-#                 ,segment.color = "#333333"
-# )
-# 
-# 
-# 
-# 
-# 
-# 
-# port_data %>% 
-#   mutate(x_nudge = case_when( location == 'Port Brownsville, Texas' ~ 1.3
-#                               ,location == 'Port Isabel, Texas' ~ 1.3
-#                               ,location == 'Port Mansfield, Texas' ~ 1.5
-#                               ,location == 'Port Corpus Christi, Texas' ~ 1.5
-#                               ,location == 'Port Lavaca, Texas' ~ -1
-#                               ,location == 'Port Freeport, Texas' ~ 1
-#                               #,location == 'Port of Texas City, Texas' ~ 0
-#                               ,location == 'Texas City, Texas' ~ -1
-#                               ,location == 'Port Galveston, Texas' ~ 1
-#                               ,location == 'Port Houston, Texas' ~ -1.5
-#                               ,location == 'Port Sabine Pass, Texas' ~ .5
-#                               ,location == 'Port Arthur, Texas' ~ 1
-#                               ,location == 'Port Beaumont, Texas' ~ -.6
-#                               ,location == 'Port of Orange, Texas' ~ 1.6
-#                               ,TRUE ~ 0)
-#          ,y_nudge = case_when( location == 'Port Brownsville, Texas' ~ -1
-#                                ,location == 'Port Isabel, Texas' ~ 0
-#                                ,location == 'Port Mansfield, Texas' ~ .2
-#                                ,location == 'Port Corpus Christi, Texas' ~ 0
-#                                ,location == 'Port Lavaca, Texas' ~ .5
-#                                ,location == 'Port Freeport, Texas' ~ -.5
-#                                ,location == 'Texas City, Texas' ~ 0
-#                                ,location == 'Port Galveston, Texas' ~ -.5
-#                                ,location == 'Port Houston, Texas' ~ .8
-#                                ,location == 'Port Sabine Pass, Texas' ~ -.5
-#                                ,location == 'Port Arthur, Texas' ~ .1
-#                                ,location == 'Port Beaumont, Texas' ~ .6
-#                                ,location == 'Port of Orange, Texas' ~ .5
-#                                ,TRUE ~ 0)
-#   ) -> port_data
+} 
+
+#=================================================================================#
+#      Function: Plotting average risk scores on UGA map - minus water bodies     #
+
+
+plot_UGA_avg.risk.zones_func2 <- function(Uganda_dist, risk_overlay, risk_map){
+  
+  # transform co-ordinates and test plot #
+  Uganda_dist_latlon <- sp::spTransform(Uganda_dist, CRS("+proj=longlat +datum=WGS84"))
+  plot(Uganda_dist_latlon, axes=TRUE)
+  points(x=31.76828, y=3.22909063, col = "red", pch=1, bg = "red")
+  
+  # to get centroids for each district #
+  Uganda_dist_centroids <- coordinates(sp::spTransform(Uganda_dist, CRS("+proj=longlat +datum=WGS84"))) # trasnform spatial obj to lat/lon data
+  
+  Uganda_dist_centroids_df <- as.data.frame(Uganda_dist_centroids)
+  
+  vector_dist <- as.character(Uganda_dist_latlon$DISTRICT) # make a vector of district names to supply a column with these
+  
+  Uganda_dist_centroids_df$district <- vector_dist # add this vector to the centroids dataframe
+  
+  Uganda_dist_centroids_df <- 
+    Uganda_dist_centroids_df %>% 
+    dplyr::rename(
+      lon = V1,
+      lat = V2
+    )
+  
+  Uganda_master <- cbind(Uganda_dist_centroids_df, risk_overlay)
+  
+  Uganda_master <- within(Uganda_master,  label <- paste(recoded_districts_chr, mean_risk_score, mode_risk_score, sep="; ")) # make a column for a label
+  Uganda_master <- within(Uganda_master,  label2 <- paste(recoded_districts_chr, mode_risk_score, sep="; ")) # make a column for a label
+  
+  
+  labels_to_remove <- c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule") # districts where no MDA has occured
+  
+  # remove these districts (make NA in label)
+  Uganda_master$label[Uganda_master$recoded_districts %in% c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule")] <- NA
+  Uganda_master$label2[Uganda_master$recoded_districts %in% c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule")] <- NA
+  
+  # ==========================================================================#
+  # need to locate water bodies and remove co-ordinates from analysis for UGA #
+  
+  URL <- "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/physical/ne_50m_lakes.zip"
+  
+  fil <- basename(URL)
+  if (!file.exists(fil)) download.file(URL, fil)
+  fils <- unzip(fil)
+  lakes <- readOGR(grep("shp$", fils, value=TRUE), "ne_50m_lakes",
+                   stringsAsFactors=FALSE, verbose=FALSE)
+  
+  lakes_sf <- sf::st_as_sf(lakes) # make sf spatial object for joining
+  
+  # for plotting the lakes # 
+  lakes_UGA <- lakes_sf %>% dplyr::select(name, name_en)
+  
+  lakes_UGA <- lakes_UGA %>% filter(name %in% c("Lake Victoria", "Lake Albert","Lake Kyoga","Lake Edward"))
+  #=============================================== #
+  #   plot labels on risk map                      #
+  
+  risk_map1 <- 
+    risk_map +
+    geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue", alpha = 0.8) + 
+    ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4, family = 'Avenir', segment.color = "#333333")
+  
+  risk_map2 <- 
+    risk_map +
+    geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue", alpha = 0.8) + 
+    ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+  
+  
+  return(list(risk_map1, risk_map2))
 
 } 
 
@@ -1348,7 +1619,13 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
   
   value_rf <- c("grey90", "gold", "darkorchid1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
   
-  # make labels (sub-counties with MDA) for plotting
+  # make labels (sub-counties with MDA) for plotting (labels for subcounty risk score)
+  risk_score2 <- na.omit(risk_score)
+  
+  scnames$risk_factor <- risk_score2$mode_risk_score
+  scnames <- within(scnames,  label1 <- paste(label, risk_factor, sep="; "))
+
+  # make labels (sub-counties with MDA) for plotting (labels for districts with aggregate sub-county risk score)
   risk_score_dist2 <- na.omit(risk_score_dist)
   
   dnames <- aggregate(cbind(x, y) ~ DISTRICT, data=master_dist2, FUN=mean)
@@ -1375,7 +1652,7 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
             axis.ticks = element_blank(),
             panel.background = element_blank()) +
       cowplot::panel_border(remove = TRUE) +
-      ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 2, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+      ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
     
     plot2 <- ggplot() +
       geom_tile(data = RF_data_plotting, 
@@ -1553,6 +1830,13 @@ average_risk_subcounties_func4 <- function(data_to_join, data_to_join2, RF_data_
   value_rf <- c("grey90", "gold", "darkorchid1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
   
  if(year == 2011 || year == 2015 || year == 2019){
+   
+   # make labels (sub-counties with MDA) for plotting (labels for subcounty risk score)
+   risk_score_nolakes2 <- na.omit(risk_score_nolakes)
+   
+   scnames$risk_factor <- risk_score_nolakes2$mode_risk_score
+   scnames <- within(scnames,  label1 <- paste(label, risk_factor, sep="; "))
+   
     plot1 <- ggplot() +
       geom_tile(data = RF_data_plotting, 
                 aes(x = x, y = y, fill = risk_fact_bins)) +
@@ -1571,7 +1855,7 @@ average_risk_subcounties_func4 <- function(data_to_join, data_to_join2, RF_data_
             axis.ticks = element_blank(),
             panel.background = element_blank()) +
       cowplot::panel_border(remove = TRUE) +
-      ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 2.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+      ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
       coord_sf(xlim = c(29.83, 35.1), ylim = c(-1.5, 4.32))
   }
   
