@@ -84,6 +84,16 @@ subcounties_PCCstudies_object_2011 <- subcounty_PCCstudies_processing_plotting_f
 
 subcounties_PCCstudies_object_2011[[3]]
 
+# for 2013 PCC studies #
+SC_names_2013 <- subcounties_name_func3(shape_file = subcounties_2019, year = 2013) 
+
+subcounties_PCCstudies_object_2013 <- subcounty_PCCstudies_processing_plotting_func(sc_names = SC_names_2013, 
+                                                                                    UGA_subcounties_tidy = UGA_subcounty_object_2019[[3]], 
+                                                                                    district_2001 = district_2001, national_map_input = national_map, 
+                                                                                    PCC_survey_year = 2013)
+
+subcounties_PCCstudies_object_2013[[3]]
+
 # for 2015 PCC studies #
 SC_names_2015 <- subcounties_name_func3(shape_file = subcounties_2019, year = 2015) 
 
@@ -122,11 +132,12 @@ overlay_2011 <- plotting_overlays_func(risk_factor1 = sanitation_2011[[3]], risk
 # second: calculate avg. risk by sub-county & plot
 risk_fact_subcounties_object_2011 <- average_risk_subcounties_func3(RF_data = overlay_2011[[3]], subcounties = subcounties_2010_sp, 
                                                                    subcounty_PCCstudies_data = subcounties_PCCstudies_object_2011[[1]], 
-                                                                   scnames = , 
+                                                                   scnames = subcounties_PCCstudies_object_2011[[4]], 
                                                                    UGA_subcounties_tidy_subset = subcounties_PCCstudies_object_2011[[5]], 
                                                                    UGA_subcounties_tidy = subcounties_PCCstudies_object_2011[[1]], 
                                                                    UGA_districts_tidy_subset = subcounties_PCCstudies_object_2011[[6]],
-                                                                   districts_2001 = districts_2001, year = 2011)
+                                                                   districts_2001 = districts_2001, year = 2011,
+                                                                   Sub_county_TSdata = Sub_county_TSdata)
 
 risk_fact_subcounties_object_2011[[1]] # risk factor score for all sub-counties
 risk_fact_subcounties_object_2011[[2]] # average risk factor score across sub-counties for each district
@@ -147,18 +158,61 @@ risk_fact_subcounties_nowater_object_2011[[3]]
 risk_fact_subcounties_nowater_object_2011[[4]] # map
 risk_fact_subcounties_nowater_object_2011[[5]]
 
+# ============================ #
+# for 2013 PCC sub-county data #
+
+# first: need to call & produce risk factor overlay 
+
+# sanitation_2011 <- sanitation
+# poverty_lowest40_2011 <- poverty_lowest40
+# 
+# overlay_2011 <- plotting_overlays_func(risk_factor1 = sanitation_2011[[3]], risk_factor2 = pig_populationFAO[[1]],
+#                                        risk_factor3 = poverty_lowest40_2011[[3]],
+#                                        admin_processed = districts_2001, admin = districts_2001, year = "2011-2015")
+
+# second: calculate avg. risk by sub-county & plot
+
+risk_fact_subcounties_object_2013 <- average_risk_subcounties_func3(RF_data = overlay_2011[[3]], subcounties = subcounties_2019_sp, 
+                                                                    subcounty_PCCstudies_data = subcounties_PCCstudies_object_2013[[1]], 
+                                                                    scnames = subcounties_PCCstudies_object_2013[[4]], 
+                                                                    UGA_subcounties_tidy_subset = subcounties_PCCstudies_object_2013[[5]], 
+                                                                    UGA_subcounties_tidy = subcounties_PCCstudies_object_2013[[1]],
+                                                                    UGA_districts_tidy_subset = subcounties_PCCstudies_object_2013[[6]],
+                                                                    districts_2001 = districts_2001, year = 2013,
+                                                                    Sub_county_TSdata = Sub_county_TSdata)
+
+risk_fact_subcounties_object_2013[[1]] # risk factor score for all sub-counties
+risk_fact_subcounties_object_2013[[2]] # average risk factor score across sub-counties for each district
+risk_fact_subcounties_object_2013[[3]] # plot of sub-counties over risk factor map (sub-county labels)
+risk_fact_subcounties_object_2013[[4]] # plot of sub-counties over risk factor map (avg. score across sub-counties per district)
+
+risk_fact_subcounties_object_2013[[9]]
+
+# repeat analysis but exclude any datapoints in sub-counties located in water bodies (i.e. risk score here not counted)
+risk_fact_subcounties_nowater_object_2013 <- average_risk_subcounties_func4(data_to_join = risk_fact_subcounties_object_2013[[6]],
+                                                                            data_to_join2 = risk_fact_subcounties_object_2013[[7]],
+                                                                            RF_data_plotting = overlay_2011[[3]], 
+                                                                            UGA_subcounties_tidy_subset = subcounties_PCCstudies_object_2013[[5]], 
+                                                                            scnames = subcounties_PCCstudies_object_2013[[4]],
+                                                                            year = 2013)
+
+risk_fact_subcounties_nowater_object_2013[[1]]
+risk_fact_subcounties_nowater_object_2013[[2]] # map
+risk_fact_subcounties_nowater_object_2013[[3]]
+risk_fact_subcounties_nowater_object_2013[[4]] # map
+risk_fact_subcounties_nowater_object_2013[[5]]
 
 # ============================ #
 # for 2015 PCC sub-county data #
 
 # first: need to call & produce risk factor overlay 
 
-sanitation_2011 <- sanitation
-poverty_lowest40_2011 <- poverty_lowest40
-
-overlay_2011 <- plotting_overlays_func(risk_factor1 = sanitation_2011[[3]], risk_factor2 = pig_populationFAO[[1]],
-                                       risk_factor3 = poverty_lowest40_2011[[3]],
-                                       admin_processed = districts_2001, admin = districts_2001, year = "2011-2015")
+# sanitation_2011 <- sanitation
+# poverty_lowest40_2011 <- poverty_lowest40
+# 
+# overlay_2011 <- plotting_overlays_func(risk_factor1 = sanitation_2011[[3]], risk_factor2 = pig_populationFAO[[1]],
+#                                        risk_factor3 = poverty_lowest40_2011[[3]],
+#                                        admin_processed = districts_2001, admin = districts_2001, year = "2011-2015")
 
 # second: calculate avg. risk by sub-county & plot
 
@@ -168,7 +222,8 @@ risk_fact_subcounties_object_2015 <- average_risk_subcounties_func3(RF_data = ov
                                                                    UGA_subcounties_tidy_subset = subcounties_PCCstudies_object_2015[[5]], 
                                                                    UGA_subcounties_tidy = subcounties_PCCstudies_object_2015[[1]],
                                                                    UGA_districts_tidy_subset = subcounties_PCCstudies_object_2015[[6]],
-                                                                   districts_2001 = districts_2001, year = 2015)
+                                                                   districts_2001 = districts_2001, year = 2015,
+                                                                   Sub_county_TSdata = Sub_county_TSdata)
 
 risk_fact_subcounties_object_2015[[1]] # risk factor score for all sub-counties
 risk_fact_subcounties_object_2015[[2]] # average risk factor score across sub-counties for each district
@@ -208,7 +263,8 @@ risk_fact_subcounties_object_2019 <- average_risk_subcounties_func3(RF_data = ov
                                                                    UGA_subcounties_tidy_subset = subcounties_PCCstudies_object_2019[[5]], 
                                                                    UGA_subcounties_tidy = subcounties_PCCstudies_object_2019[[1]],
                                                                    UGA_districts_tidy_subset = subcounties_PCCstudies_object_2019[[6]],
-                                                                   districts_2001 = districts_2001, year = 2019)
+                                                                   districts_2001 = districts_2001, year = 2019,
+                                                                   Sub_county_TSdata = Sub_county_TSdata)
 
 risk_fact_subcounties_object_2019[[1]] # risk factor score for all sub-counties
 risk_fact_subcounties_object_2019[[2]] # average risk factor score across sub-counties for each district
@@ -231,3 +287,51 @@ risk_fact_subcounties_nowater_object_2019[[3]]
 risk_fact_subcounties_nowater_object_2019[[4]] # map
 risk_fact_subcounties_nowater_object_2019[[5]]
 
+
+
+#===========================================================================================================================================#
+#                              Mapping TS studies x PCC risk for district-level data                                                        #
+#===========================================================================================================================================#
+
+# A) for 2001 to 2012 data
+UGA_subcounty_object_2004_2012 <- UGA_subcounties_boundaries_function(subcounty_shape_file = subcounties_2010, 
+                                                                      district_map = districts_2001, national_map_input = national_map)
+
+UGA_subcounty_object_2004_2012[[1]]
+
+# extract sub-county names for 2003-2009 & 2010-2020 #
+district_names_20062010_object <- subcounty_name0412_func(shape_file = UGA_subcounty_object_2004_2012[[2]]) 
+
+
+district_2006_names <- district_names_20062010_object[[1]] # for 2003 - 2009 sub-counties 
+
+district_2010_names <- district_names_20062010_object[[2]] # for 2010 sub-counties onwards
+
+# B) for 2013-2019 data
+UGA_subcounty_object_2019 <- UGA_subcounties_boundaries_function(subcounty_shape_file = subcounties_2019, 
+                                                                 district_map = districts_2001, national_map_input = national_map)
+
+UGA_subcounty_object_2019[[1]]
+
+# extract sub-county names for 2013-2019 #
+district_names_2019_object <- subcounty_name19_func(shape_file = UGA_subcounty_object_2019[[2]]) 
+
+
+district_2019_names <- district_names_2019_object[[1]] # for 2003 - 2009 sub-counties 
+
+#=====================================================================================================#
+# Extract districts with PCC studies to i) work out average risk & ii) plot over PCC risk factors     #
+#=====================================================================================================#
+
+# for 2002-2005 PCC studies #
+Dist_names_0205 <- districts_name_func3(shape_file = subcounties_2010, year = "2002-2005") 
+
+district_PCCstudies_object_0205 <- district_PCCstudies_processing_plotting_func(dist_names = district_2006_names,
+                                                                                    district_2001 = district_2001, national_map_input = national_map, 
+                                                                                    PCC_survey_years = "2002-2005")
+
+district_PCCstudies_object_0205[[2]]
+
+# repeat for 2006-2011, 2012-2015, 2016-2020 studies #
+
+# then just need a function to plot avg risk for specific districts, risk maps and TS studies

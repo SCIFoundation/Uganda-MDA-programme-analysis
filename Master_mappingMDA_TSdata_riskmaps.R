@@ -288,31 +288,112 @@ plot(avg.risk.map.water_2016[[1]]) # mean risk scores not useful
 plot(avg.risk.map.water_2016[[2]]) # therefore onl
 
 
-#===================================================================================================================================#
-#                                               Mapping sub-district MDA locations                                                  #
+#=====================================================================================================================================#
+#                                    Mapping TS studies (district-level) with avg. risk                                               #
+# ====================================================================================================================================#
+source('Mapping_coverage.R')
 
 
-# for 2004 sub-district MDA data and 2001-2005 risk factor map
-matched_MDA_rf_0305 <- find_subdistrictMDA_location_match_riskzone_func(Sub_district_MDA_locations_df = Sub_district_MDA_locations_2001_2005_df,
-                                                 overlay = overlay_2001, avg.risk.map = avg.risk.map_2001)
-
-matched_MDA_rf_0305[[1]]
-
-matched_MDA_rf_0305[[2]]
-
-matched_MDA_rf_0305[[3]]
-
-matched_MDA_rf_0305[[4]]
+# just need a vector of districts to map (with TS studies) for each of 2002-2005, 2006-2011 etc --> then subset the labels above 
+# modify plot_UGA_avg.risk.zones_func in Risk_factor_plotting_funcs --> add risk_map3 with PCC stuy districts only to plot
+# include TS data on this new risk_map3 plot
 
 
-# for 2012 sub-district MDA data and 2011-2015 risk factor map
-matched_MDA_rf_1115 <- find_subdistrictMDA_location_match_riskzone_func(Sub_district_MDA_locations_df = Sub_district_MDA_locations_2011_2015_df,
-                                                                        overlay = overlay_2011, avg.risk.map = avg.risk.map_2011)
 
-matched_MDA_rf_1115[[1]]
 
-matched_MDA_rf_1115[[2]]
 
-matched_MDA_rf_1115[[3]]
 
-matched_MDA_rf_1115[[4]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # A) for 2001 to 2012 data
+# UGA_subcounty_object_2004_2012 <- UGA_subcounties_boundaries_function(subcounty_shape_file = subcounties_2010, 
+#                                                                       district_map = districts_2001, national_map_input = national_map)
+# 
+# UGA_subcounty_object_2004_2012[[1]]
+# 
+# # extract district names #
+# district_names_20062010_object <- subcounty_name0412_func(shape_file = UGA_subcounty_object_2004_2012[[2]]) 
+# 
+# 
+# district_2006_names <- district_names_20062010_object[[1]] # for 2003 - 2009 sub-counties 
+# 
+# district_2010_names <- district_names_20062010_object[[2]] # for 2010 sub-counties onwards
+# 
+# # B) for 2013-2019 data
+# UGA_subcounty_object_2019 <- UGA_subcounties_boundaries_function(subcounty_shape_file = subcounties_2019, 
+#                                                                  district_map = districts_2001, national_map_input = national_map)
+# 
+# UGA_subcounty_object_2019[[1]]
+# 
+# # extract district names for 2013-2019 #
+# district_names_2019_object <- subcounty_name19_func(shape_file = UGA_subcounty_object_2019[[2]]) 
+# 
+# 
+# district_2019_names <- district_names_2019_object[[1]] # for 2003 - 2009 sub-counties 
+# 
+# #=====================================================================================================#
+# # Extract districts with PCC studies to i) work out average risk & ii) plot over PCC risk factors     #
+# #=====================================================================================================#
+# 
+# # for 2002-2005 PCC studies #
+# Dist_names_0205 <- districts_name_func3(shape_file = subcounties_2010, year = "2002-2005") 
+# 
+# district_PCCstudies_object_0205 <- district_PCCstudies_processing_plotting_func(dist_names = district_2006_names,
+#                                                                                 district_2001 = district_2001, national_map_input = national_map, 
+#                                                                                 PCC_survey_years = "2002-2005")
+# 
+# district_PCCstudies_object_0205[[2]]
+
+
+
+
+
+
+
+# #===================================================================================================================================#
+# #                                               Mapping sub-district MDA locations                                                  #
+# 
+# 
+# # for 2004 sub-district MDA data and 2001-2005 risk factor map
+# matched_MDA_rf_0305 <- find_subdistrictMDA_location_match_riskzone_func(Sub_district_MDA_locations_df = Sub_district_MDA_locations_2001_2005_df,
+#                                                  overlay = overlay_2001, avg.risk.map = avg.risk.map_2001)
+# 
+# matched_MDA_rf_0305[[1]]
+# 
+# matched_MDA_rf_0305[[2]]
+# 
+# matched_MDA_rf_0305[[3]]
+# 
+# matched_MDA_rf_0305[[4]]
+# 
+# 
+# # for 2012 sub-district MDA data and 2011-2015 risk factor map
+# matched_MDA_rf_1115 <- find_subdistrictMDA_location_match_riskzone_func(Sub_district_MDA_locations_df = Sub_district_MDA_locations_2011_2015_df,
+#                                                                         overlay = overlay_2011, avg.risk.map = avg.risk.map_2011)
+# 
+# matched_MDA_rf_1115[[1]]
+# 
+# matched_MDA_rf_1115[[2]]
+# 
+# matched_MDA_rf_1115[[3]]
+# 
+# matched_MDA_rf_1115[[4]]

@@ -1446,7 +1446,8 @@ return(list(risk_score_nolakes, plot1, risk_score_district_nolakes, plot2, dname
 
 
 average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCstudies_data, scnames, UGA_subcounties_tidy_subset, 
-                                          UGA_subcounties_tidy, districts_2001, UGA_districts_tidy_subset, year){
+                                          UGA_subcounties_tidy, districts_2001, UGA_districts_tidy_subset, year,
+                                          Sub_county_TSdata){
   
   RF_data_plotting <- RF_data # maintain original risk factor overlay for plotting later
   
@@ -1457,7 +1458,7 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
   #   data <- overlay_2001[[3]]
   # }
   
-  if(year == 2011 || year == 2015){
+  if(year == 2011 || year == 2013 || year == 2015){
     data <- overlay_2011[[3]]
   }
   
@@ -1493,7 +1494,7 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
   }
   
   
-  if(year == 2015 || year == 2019){
+  if(year == 2013 || year == 2015 || year == 2019){
     # make into an sf (spatial) object for joining
     
     subcounty_PCCstudies_data <- with(subcounty_PCCstudies_data,  subcounty_PCCstudies_data[order(Subcounty) , ])
@@ -1521,7 +1522,7 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
     master2$subcounty_factor_test <- as.factor(master2$SNAME_2010)
   }
   
-  if(year == 2015 || year == 2019){
+  if(year == 2013 || year == 2015 || year == 2019){
     master2$subcounty_factor_test <- as.factor(master2$Subcounty)
   }
   
@@ -1585,7 +1586,7 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
     master_dist2 <- master_dist2 %>% tidyr::drop_na(SNAME_2010)
   }
   
-  if(year == 2015 || year == 2019){
+  if(year == 2013 || year == 2015 || year == 2019){
     master_dist2 <- master_dist2 %>% tidyr::drop_na(Subcounty)
   }
   
@@ -1634,12 +1635,19 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
   dnames <- within(dnames,  label1 <- paste(DISTRICT, risk_factor, sep="; "))
   dnames <- dnames %>% dplyr::rename(long = x, lat = y)
   
-  if(year == 2011 || year == 2015 || year == 2019){
+  if(year == 2011 || year == 2013 || year == 2015 || year == 2019){
+    
+    # subset Sub-county TS data depending on year
+    Sub_county_TSdata$Prev_adjustment <- as.factor(Sub_county_TSdata$type)
+    Sub_county_TSdata_subset <- subset(Sub_county_TSdata, study_year == year)
+
     plot1 <- ggplot() +
       geom_tile(data = RF_data_plotting, 
                 aes(x = x, y = y, fill = risk_fact_bins)) +
       geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
       geom_polygon(data= UGA_subcounties_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey), size = 1.2, fill=NA, alpha=NA)+
+      # geom_point(data = Sub_county_TSdata_subset, aes(x= long, y = lat, size = prevalence, shape = Prev_adjustment), shape=21, 
+      #            fill = "yellow", colour = "black", alpha = 0.75)+
       scale_fill_manual(name = "Class",
                         values = value_rf, 
                         na.value = NA, na.translate = FALSE)+
@@ -1654,11 +1662,26 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
       cowplot::panel_border(remove = TRUE) +
       ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
     
+    type_chr <- as.character(Sub_county_TSdata_subset$type) # make character for legend (based on informed or apparent prev)
+    range_toplot <- range(Sub_county_TSdata_subset$prevalence) # prev range to plot in legend for specific survey year
+    
+    plot1a <- plot1 +
+      geom_point(data = Sub_county_TSdata_subset, aes(x= long, y = lat, size = prevalence), shape=21, 
+                 fill = "yellow", colour = "black", alpha = 0.75)+
+      scale_size_continuous(name=type_chr,
+                          breaks = c(5, 10, 15, 20, 30, 40, 50, 60, 90),
+                          # labels=c("0-10%", "10.01-25%", "25.01-40%",
+                          #            "40.01-60%", ">60%"),
+                          limits = c(0,92))
+    
+    
     plot2 <- ggplot() +
       geom_tile(data = RF_data_plotting, 
                 aes(x = x, y = y, fill = risk_fact_bins)) +
       geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "grey45", alpha = 1, fill = NA)+
       geom_polygon(data= UGA_subcounties_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey), size = 1.2, fill=NA, alpha=NA)+
+      geom_point(data = Sub_county_TSdata_subset, aes(x= long, y = lat, size = prevalence, shape = Prev_adjustment), shape=21, 
+                 fill = "yellow", colour = "black", alpha = 0.75)+
       scale_fill_manual(name = "Class",
                         values = value_rf, 
                         na.value = NA, na.translate = FALSE)+
@@ -1673,6 +1696,15 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
       cowplot::panel_border(remove = TRUE) +
       ggrepel::geom_text_repel(data = dnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
     
+    
+    plot2a <- plot2 +
+      geom_point(data = Sub_county_TSdata_subset, aes(x= long, y = lat, size = prevalence), shape=21, 
+                 fill = "yellow", colour = "black", alpha = 0.75)+
+      scale_size_continuous(name=type_chr,
+                            breaks = c(5, 10, 15, 20, 30, 40, 50, 60, 90),
+                            # labels=c("0-10%", "10.01-25%", "25.01-40%",
+                            #            "40.01-60%", ">60%"),
+                            limits = c(0,92))
     
     plot3 <- ggplot() +
       geom_tile(data = RF_data_plotting, 
@@ -1697,7 +1729,7 @@ average_risk_subcounties_func3 <- function(RF_data, subcounties, subcounty_PCCst
     
   }
   
-  return(list(risk_score, risk_score_dist, plot1, plot2, master2, master_lake, master_dist_tosave, dnames, plot3))
+  return(list(risk_score, risk_score_dist, plot1a, plot2a, master2, master_lake, master_dist_tosave, dnames, plot3))
   
 }
 
@@ -1735,7 +1767,7 @@ average_risk_subcounties_func4 <- function(data_to_join, data_to_join2, RF_data_
     master_lakes_filtered$subcounty_factor_test <- as.factor(master_lakes_filtered$SNAME_2010)
   }
   
-  if(year == 2015 || year == 2019){
+  if(year == 2013 || year == 2015 || year == 2019){
     master_lakes_filtered$subcounty_factor_test <- as.factor(master_lakes_filtered$Subcounty)
   }
   
@@ -1791,7 +1823,7 @@ average_risk_subcounties_func4 <- function(data_to_join, data_to_join2, RF_data_
     master_lakes_district_filtered2 <- master_lakes_district_filtered2 %>% tidyr::drop_na(SNAME_2010)
   }
   
-  if(year == 2015 || year == 2019){
+  if(year == 2013 || year == 2015 || year == 2019){
     master_lakes_district_filtered2 <- master_lakes_district_filtered2 %>% tidyr::drop_na(Subcounty)
   }
   
@@ -1829,7 +1861,16 @@ average_risk_subcounties_func4 <- function(data_to_join, data_to_join2, RF_data_
   
   value_rf <- c("grey90", "gold", "darkorchid1", "red1", "springgreen", "darkorange1", "pink1", "tan4")
   
- if(year == 2011 || year == 2015 || year == 2019){
+  
+  # subset Sub-county TS data depending on year
+  Sub_county_TSdata$Prev_adjustment <- as.factor(Sub_county_TSdata$type)
+  Sub_county_TSdata_subset <- subset(Sub_county_TSdata, study_year == year)
+  
+  type_chr <- as.character(Sub_county_TSdata_subset$type) # make character for legend (based on informed or apparent prev)
+  range_toplot <- range(Sub_county_TSdata_subset$prevalence) # prev range to plot in legend for specific survey year
+  
+  
+ if(year == 2011 || year == 2013 || year == 2015 || year == 2019){
    
    # make labels (sub-counties with MDA) for plotting (labels for subcounty risk score)
    risk_score_nolakes2 <- na.omit(risk_score_nolakes)
@@ -1857,6 +1898,14 @@ average_risk_subcounties_func4 <- function(data_to_join, data_to_join2, RF_data_
       cowplot::panel_border(remove = TRUE) +
       ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
       coord_sf(xlim = c(29.83, 35.1), ylim = c(-1.5, 4.32))
+    
+    plot1a <- plot1 +
+      geom_point(data = Sub_county_TSdata_subset, aes(x= long, y = lat, size = prevalence), shape=21, 
+                 fill = "yellow", colour = "black", alpha = 0.75)+
+      scale_size_continuous(name=type_chr,
+                            breaks = c(5, 10, 15, 20, 30, 40, 50, 60, 90),
+                            limits = c(0,92))
+      #scale_size(limits = c(0,92)) 
   }
   
   # make NEW labels (sub-counties across districts with MDA) for plotting
@@ -1889,7 +1938,16 @@ average_risk_subcounties_func4 <- function(data_to_join, data_to_join2, RF_data_
     ggrepel::geom_text_repel(data = dnames2, aes(long, lat, label = label1), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
     coord_sf(xlim = c(29.83, 35.1), ylim = c(-1.5, 4.32))
   
+  plot2a <- plot2 +
+    geom_point(data = Sub_county_TSdata_subset, aes(x= long, y = lat, size = prevalence), shape=21, 
+               fill = "yellow", colour = "black", alpha = 0.75)+
+    scale_size_continuous(name=type_chr,
+                          breaks = c(5, 10, 15, 20, 30, 40, 50, 60, 90),
+                          # labels=c("0-10%", "10.01-25%", "25.01-40%",
+                          #            "40.01-60%", ">60%"),
+                          limits = c(0,92))
   
-  return(list(risk_score_nolakes, plot1, risk_score_district_nolakes, plot2, dnames2))
+  
+  return(list(risk_score_nolakes, plot1a, risk_score_district_nolakes, plot2a, dnames2))
   
 }

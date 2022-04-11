@@ -2311,7 +2311,7 @@ if (year == 2015 || year == 2016 || year == 2018){
 return(list(UGA_subcounties_tidy, UGA_districts_tidy, plot1, scnames, UGA_subcounties_tidy_subset, UGA_districts_tidy_subset))
 } 
 
-
+#===========================================================================================================================================#
 #========================================================================#
 #  identifying sub-counties where PCC surveys have been conducted        #
 #========================================================================#
@@ -2328,7 +2328,7 @@ subcounties_name_func3 <- function(shape_file, year){
     
   }
   
-  if(year == 2015){
+  if(year == 2013 || year == 2015 || year == 2019){
     
     UGA_SC_PCCstudies_names <- data.frame(Subcounty_name = shape_file@data$Subcounty,
                                    District_name = shape_file@data$District)
@@ -2339,11 +2339,11 @@ subcounties_name_func3 <- function(shape_file, year){
   }
   
 
-  if(year == 2019){
-    
-    UGA_SC_PCCstudies_names <- data.frame(Subcounty_name = shape_file@data$Subcounty,
-                                   District_name = shape_file@data$District)
-  }
+  # if(year == 2019){
+  #   
+  #   UGA_SC_PCCstudies_names <- data.frame(Subcounty_name = shape_file@data$Subcounty,
+  #                                  District_name = shape_file@data$District)
+  # }
   
   return(UGA_SC_PCCstudies_names)
   
@@ -2384,6 +2384,25 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
                                          UGA_subcounties_tidy$SNAME_2010, NA)
   }
   
+  #================================================================#
+  #  For PCC study locations >2012 (using a different shape file)  #
+  
+  if (PCC_survey_year == 2013){
+    
+    PCCstudy_subcounties <-
+      c("BUTANSI", "KITAYUNJWA", "NAMWENDWA", "BUGULUMBYA", "KABONERA", "KATWE-BUTEGO DIVISION",
+        "KIMAANYA-KYABAKUZA DIVISION", "KKINGO", "KYANAMUKAAKA", "NYENDO-SSENYANGE DIVISION",
+        "KYAMPISI", "NTENJERU") # there is no Mukono TC sub-county
+    
+    sc_names # copy variable (dist names) : UGA_dist_MDA_names <- district_names 
+    
+    sc_names$PCC_survey <- ifelse(sc_names$Subcounty_name %in% PCCstudy_subcounties, "PCC survey","none") # code whether MDA or not
+    
+    sc_names <- sc_names  %>% rename(Subcounty = Subcounty_name, District = District_name) # rename column
+    
+  }
+  
+  
   if (PCC_survey_year == 2015){
     
     PCCstudy_subcounties <-
@@ -2410,7 +2429,7 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
     
     }
   
-  if (PCC_survey_year == 2015 || PCC_survey_year == 2019){
+  if (PCC_survey_year == 2013 || PCC_survey_year == 2015 || PCC_survey_year == 2019){
     # ==================================================== #
     # make MDA yes or no variable for sub counties with MDA
     UGA_subcounties_tidy <- left_join(UGA_subcounties_tidy, sc_names) # join boundary data to MDA presence data
@@ -2451,6 +2470,12 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
         "MASAKA") # vector of districts with MDA in 2003
   } 
   
+  if (PCC_survey_year == 2013){
+    
+    PCC_survey_districts <-
+      c("LWENGO", "MUKONO", "MASAKA", "KAMULI")
+  } 
+  
   if (PCC_survey_year == 2015){
     
     PCC_survey_districts <-
@@ -2460,7 +2485,7 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
   if (PCC_survey_year == 2019){
     
     PCC_survey_districts <-
-      c("ARUA","GULU")
+      c("ARUA","GULU", "AMURU")
   } 
   
   UGA_dist_PCCsurvey_names$PCC_survey <- ifelse(district_names_0319$Dist_name %in% PCC_survey_districts, "PCC survey","none") # code whether MDA or not
@@ -2494,7 +2519,7 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
     scnames$label <- scnames$SNAME_2010
   }
   
-  if (PCC_survey_year == 2015 || PCC_survey_year == 2019){
+  if (PCC_survey_year == 2013 || PCC_survey_year == 2015 || PCC_survey_year == 2019){
     # make labels (sub-counties with MDA) for plotting
     UGA_subcounties_tidy_subset <- subset(UGA_subcounties_tidy, PCC_survey=="PCC survey")   #subset just for NYS
     scnames <- aggregate(cbind(long, lat) ~ Subcounty, data=UGA_subcounties_tidy_subset, FUN=mean)
@@ -2520,7 +2545,7 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
   #     guides(fill=guide_legend(override.aes=list(shape=21, size=3, colour="black", stroke=1.2))) # need this to get colour in the fill (sample.size) legend
   # }
   
-  if (PCC_survey_year == 2011 || PCC_survey_year == 2015 || PCC_survey_year == 2019){
+  if (PCC_survey_year == 2011 || PCC_survey_year == 2013 || PCC_survey_year == 2015 || PCC_survey_year == 2019){
     
     UGA_districts_tidy_subset <- subset(UGA_districts_tidy, PCC_survey=="PCC survey")   # subset MDA districts to plot
     
@@ -2543,3 +2568,266 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
 } 
 
 
+#===========================================================================================================================================#
+#=========================================================================================================#
+#  identifying districts where PCC surveys have been conducted (only district-level data available)       #
+#=========================================================================================================#
+
+
+
+districts_name_func3 <- function(shape_file, year){
+  
+  if(year == "2002-2005"){
+    
+    UGA_SC_PCCstudies_names <- data.frame(District_name = shape_file@data$DNAME_2006) 
+    
+    UGA_SC_PCCstudies_names <- with(UGA_SC_PCCstudies_names,  UGA_SC_PCCstudies_names[order(District_name) , ])
+    
+  }
+  
+  if(year == "2006-2011"){
+    
+    UGA_SC_PCCstudies_names <- data.frame(District_name = shape_file@data$DNAME_2010) 
+    
+    UGA_SC_PCCstudies_names <- with(UGA_SC_PCCstudies_names,  UGA_SC_PCCstudies_names[order(District_name) , ])
+    
+  }
+  
+  if(year == "2012-2015" || year == "2016-2020"){
+    
+    UGA_SC_PCCstudies_names <- data.frame(District_name = shape_file@data$District)
+    
+    UGA_SC_PCCstudies_names <- with(UGA_SC_PCCstudies_names,  UGA_SC_PCCstudies_names[order(District_name) , ])
+    
+    
+  }
+  
+  return(UGA_SC_PCCstudies_names)
+  
+}
+
+
+
+
+
+district_PCCstudies_processing_plotting_func <- function(dist_names, district_2001, national_map_input, PCC_survey_years){
+  
+  # =============================================================#
+  #  Extract sub-county locations where PCC studies have occured #
+  
+  
+  # if (PCC_survey_years == "2022-2005"){
+  #   
+  #   PCCstudy_districts <-
+  #     c("LIRA","KAMULI") 
+  #   
+  #   dist_names # copy variable (dist names) : UGA_dist_MDA_names <- district_names 
+  #   
+  #   dist_names$PCC_survey <- ifelse(dist_names$Dist_name %in% PCCstudy_districts, "PCC survey","none") # code whether MDA or not
+  #   
+  #   dist_names <- dist_names  %>% rename(DNAME_2006 = Dist_name) # rename column
+  #   
+  #   # ============================================================ #
+  #   # make MDA yes or no variable for sub counties with PCC survey #
+  #   UGA_subcounties_tidy <- left_join(UGA_subcounties_tidy, dist_names) # join boundary data to MDA presence data
+  #   
+  #   UGA_subcounties_tidy$PCC_survey <- as.factor(UGA_subcounties_tidy$PCC_survey) # make MDA presence a factor
+  #   
+  #   PCC_survey.dist.col <- c("purple2", NA) # to colour MDA districts
+  #   
+  #   PCC_survey.dist.vec <- PCC_survey.dist.col[UGA_subcounties_tidy$PCC_survey] # specify colour for each polygon
+  #   
+  #   UGA_subcounties_tidy$PCC_survey_colour <- PCC_survey.dist.vec # new column for fill in ggplot depending on MDA
+  #   
+  #   UGA_subcounties_tidy$label <- ifelse(UGA_subcounties_tidy$PCC_survey == "PCC survey", 
+  #                                        UGA_subcounties_tidy$DNAME_2006, NA)
+  # }
+  # 
+  # #================================================================#
+  # #  For PCC study locations >2012 (using a different shape file)  #
+  # 
+  # if (PCC_survey_year == 2013){
+  #   
+  #   PCCstudy_subcounties <-
+  #     c("BUTANSI", "KITAYUNJWA", "NAMWENDWA", "BUGULUMBYA", "KABONERA", "KATWE-BUTEGO DIVISION",
+  #       "KIMAANYA-KYABAKUZA DIVISION", "KKINGO", "KYANAMUKAAKA", "NYENDO-SSENYANGE DIVISION",
+  #       "KYAMPISI", "NTENJERU") # there is no Mukono TC sub-county
+  #   
+  #   sc_names # copy variable (dist names) : UGA_dist_MDA_names <- district_names 
+  #   
+  #   sc_names$PCC_survey <- ifelse(sc_names$Subcounty_name %in% PCCstudy_subcounties, "PCC survey","none") # code whether MDA or not
+  #   
+  #   sc_names <- sc_names  %>% rename(Subcounty = Subcounty_name, District = District_name) # rename column
+  #   
+  # }
+  # 
+  # 
+  # if (PCC_survey_year == 2015){
+  #   
+  #   PCCstudy_subcounties <-
+  #     c("OJWINA DIVISION", "BARR", "LIRA", "ADYEL DIVISION", "ADEKOKWOK", "MOYO", "METU") 
+  #   
+  #   sc_names # copy variable (dist names) : UGA_dist_MDA_names <- district_names 
+  #   
+  #   sc_names$PCC_survey <- ifelse(sc_names$Subcounty_name %in% PCCstudy_subcounties, "PCC survey","none") # code whether MDA or not
+  #   
+  #   sc_names <- sc_names  %>% rename(Subcounty = Subcounty_name, District = District_name) # rename column
+  #   
+  # }
+  # 
+  # if (PCC_survey_year == 2019){
+  #   
+  #   PCCstudy_subcounties <-
+  #     c("PAJULU","LAMOGI","UNYAMA") 
+  #   
+  #   sc_names # copy variable (dist names) : UGA_dist_MDA_names <- district_names 
+  #   
+  #   sc_names$PCC_survey <- ifelse(sc_names$Subcounty_name %in% PCCstudy_subcounties, "PCC survey","none") # code whether MDA or not
+  #   
+  #   sc_names <- sc_names  %>% rename(Subcounty = Subcounty_name, District = District_name) # rename column
+  #   
+  # }
+  # 
+  # if (PCC_survey_year == 2013 || PCC_survey_year == 2015 || PCC_survey_year == 2019){
+  #   # ==================================================== #
+  #   # make MDA yes or no variable for sub counties with MDA
+  #   UGA_subcounties_tidy <- left_join(UGA_subcounties_tidy, sc_names) # join boundary data to MDA presence data
+  #   
+  #   UGA_subcounties_tidy$PCC_survey <- as.factor(UGA_subcounties_tidy$PCC_survey) # make MDA presence a factor
+  #   
+  #   PCC_survey.SC.col <- c("purple2", NA) # to colour MDA districts
+  #   
+  #   PCC_survey.SC.vec <- PCC_survey.SC.col[UGA_subcounties_tidy$PCC_survey] # specify colour for each polygon
+  #   
+  #   UGA_subcounties_tidy$PCC_survey_colour <- PCC_survey.SC.vec # new column for fill in ggplot depending on MDA
+  #   
+  #   UGA_subcounties_tidy$label <- ifelse(UGA_subcounties_tidy$PCC_survey == "PCC survey", 
+  #                                        UGA_subcounties_tidy$Subcounty, NA)
+  # }
+  # 
+  # 
+  # ===========================================================================================================#
+  #  Extract district MDAs (valid for all MDAs across 2033-2019 when analysing by original districts of 2003)  #
+  
+  district_map_0319 <- UGA_district_boundaries_function(shape_file = districts_2001, national_map_input = national_map) 
+  
+  district_names_0319 <- district_name_func(shape_file = districts_2001) # using original districts throughout 2003-2019
+  
+  UGA_dist_PCCsurvey_names <- district_names_0319 # copy variable (dist names)
+  
+  # if (year == 2004){
+  #   # repeat for districts to highlight & check sub-counties (for each district) for 2004#
+  #   MDA_districts <-
+  #     c("APAC", "MOYO", "ADJUMANI", "ARUA", "NEBBI", "LIRA", "NAKASONGOLA", "MASINDI", "HOIMA", "BUGIRI",
+  #       "BUSIA", "KAYUNGA", "JINJA", "MUKONO", "WAKISO", "MAYUGE", "BUNDIBUGYO", "KIBAALE") # vector of districts with MDA in 2003
+  # } 
+  
+  if (PCC_survey_years == "2002-2005"){
+    
+    PCC_survey_districts <-
+      c("LIRA", "KAMULI") # vector of districts with MDA in 2003
+  } 
+  
+  # if (PCC_survey_year == 2013){
+  #   
+  #   PCC_survey_districts <-
+  #     c("LWENGO", "MUKONO", "MASAKA", "KAMULI")
+  # } 
+  # 
+  # if (PCC_survey_year == 2015){
+  #   
+  #   PCC_survey_districts <-
+  #     c("LIRA", "MOYO")
+  # } 
+  # 
+  # if (PCC_survey_year == 2019){
+  #   
+  #   PCC_survey_districts <-
+  #     c("ARUA","GULU", "AMURU")
+  # } 
+  # 
+  UGA_dist_PCCsurvey_names$PCC_survey <- ifelse(district_names_0319$Dist_name %in% PCC_survey_districts, "PCC survey","none") # code whether MDA or not
+  
+  UGA_dist_PCCsurvey_names <- UGA_dist_PCCsurvey_names  %>% rename(DISTRICT = Dist_name) # rename column
+  
+  UGA_districts_tidy <- left_join(district_map_0319[[2]], UGA_dist_PCCsurvey_names) # join boundary data to MDA presence data
+  
+  UGA_districts_tidy$PCC_survey <- as.factor(UGA_districts_tidy$PCC_survey) # make MDA presence a factor
+  
+  PCC_survey.dist.col <- c("blue",NA) # to colour MDA district
+  
+  PCC_survey.dist.vec <- PCC_survey.dist.col[UGA_districts_tidy$PCC_survey] # specify colour for each polygon
+  
+  UGA_districts_tidy$PCC_survey_colour <- PCC_survey.dist.vec # new column for fill in ggplot depending on MDA
+  
+  #======================= 
+  # make labels for plot
+  
+  # if (year == 2004){
+  #   # make labels (sub-counties with MDA) for plotting
+  #   UGA_subcounties_tidy_subset <- subset(UGA_subcounties_tidy, MDA=="MDA")   #subset just for NYS
+  #   scnames <- aggregate(cbind(long, lat) ~ SNAME_2006, data=UGA_subcounties_tidy_subset, FUN=mean)
+  #   scnames$label <- scnames$SNAME_2006
+  # }
+  
+  if (PCC_survey_years == "2002-2005"){
+    # make labels (sub-counties with MDA) for plotting
+    UGA_districts_tidy_subset <- subset(UGA_districts_tidy, PCC_survey=="PCC survey")   #subset just for NYS
+    distnames <- aggregate(cbind(long, lat) ~ DISTRICT, data=UGA_districts_tidy_subset, FUN=mean)
+    distnames$label <- distnames$DISTRICT
+  }
+  
+  # if (PCC_survey_year == 2011){
+  #   # make labels (sub-counties with MDA) for plotting
+  #   UGA_subcounties_tidy_subset <- subset(UGA_subcounties_tidy, PCC_survey=="PCC survey")   #subset just for NYS
+  #   scnames <- aggregate(cbind(long, lat) ~ SNAME_2010, data=UGA_subcounties_tidy_subset, FUN=mean)
+  #   scnames$label <- scnames$SNAME_2010
+  # }
+  # 
+  # if (PCC_survey_year == 2013 || PCC_survey_year == 2015 || PCC_survey_year == 2019){
+  #   # make labels (sub-counties with MDA) for plotting
+  #   UGA_subcounties_tidy_subset <- subset(UGA_subcounties_tidy, PCC_survey=="PCC survey")   #subset just for NYS
+  #   scnames <- aggregate(cbind(long, lat) ~ Subcounty, data=UGA_subcounties_tidy_subset, FUN=mean)
+  #   scnames$label <- scnames$Subcounty
+  # }
+  
+  # PLOT
+  
+  # if (year == 2004){
+  #   UGA_districts_tidy_subset <- subset(UGA_districts_tidy, MDA=="MDA")
+  #   
+  #   plot1 <- ggplot() +
+  #     geom_polygon(data = national_map, aes(x=long, y = lat, group = group), color = "black", size = 0.1, fill = "lightgrey") +
+  #     geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "black", alpha = 1, fill = NA)+
+  #     geom_polygon(data= UGA_districts_tidy_subset, aes(x = long, y = lat, group = group, colour= MDA_colour), fill= "purple", size = 1, alpha=0.25)+
+  #     geom_polygon(data= UGA_subcounties_tidy, aes(x = long, y = lat, group = group, colour= MDA_colour), size = 0.75, fill=NA, alpha=NA)+
+  #     coord_equal(ratio = 1)+
+  #     scale_colour_manual(values=c("blue","purple2",NA), guide=FALSE)+
+  #     ggrepel::geom_text_repel(data = scnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+  #     theme_void()+
+  #     theme(
+  #       plot.title = element_text(color="black", size=16, face="bold.italic"))+
+  #     guides(fill=guide_legend(override.aes=list(shape=21, size=3, colour="black", stroke=1.2))) # need this to get colour in the fill (sample.size) legend
+  # }
+  
+  if (PCC_survey_years == "2002-2005"){
+    
+    #UGA_districts_tidy_subset <- subset(UGA_districts_tidy, PCC_survey=="PCC survey")   # subset MDA districts to plot
+    
+    plot1 <- ggplot() +
+      geom_polygon(data = national_map, aes(x=long, y = lat, group = group), color = "black", size = 0.1, fill = "lightgrey") +
+      geom_polygon(data = districts_2001, aes(x = long, y = lat, group = group), colour = "black", alpha = 1, fill = NA)+
+      geom_polygon(data= UGA_districts_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey_colour), fill= "orange", size = 1, alpha=0.25)+
+      #geom_polygon(data= UGA_subcounties_tidy_subset, aes(x = long, y = lat, group = group, colour= PCC_survey), size = 0.75, fill=NA, alpha=NA)+
+      coord_equal(ratio = 1)+
+      scale_colour_manual(values=c("blue","purple2",NA), guide=FALSE)+
+      ggrepel::geom_text_repel(data = distnames, aes(long, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 2.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+      theme_void()+
+      theme(
+        plot.title = element_text(color="black", size=16, face="bold.italic"))+
+      guides(fill=guide_legend(override.aes=list(shape=21, size=3, colour="black", stroke=1.2))) # need this to get colour in the fill (sample.size) legend
+  }
+  
+  
+  return(list(UGA_districts_tidy, plot1, distnames, UGA_districts_tidy_subset))
+} 

@@ -40,6 +40,9 @@ load("~/Uganda-MDA-programme-analysis/Data/poverty_lowest40_2011.rdata") # 2011 
 load("~/Uganda-MDA-programme-analysis/Data/sanitation2016.rdata") # 2011 sanitation distribution spatial file
 load("~/Uganda-MDA-programme-analysis/Data/poverty_lowest40_2016.rdata") # 2011 poverty distribution spatial file
 
+#===================#
+Sub_county_TSdata <- read.csv("~/Uganda-MDA-programme-analysis/Data/Sub_county_TSdata.csv")
+
 # ============================#
 # 1) produce base national map
 
