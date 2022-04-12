@@ -668,7 +668,6 @@ Uganda_master <- cbind(Uganda_dist_centroids_df, risk_overlay)
 Uganda_master <- within(Uganda_master,  label <- paste(recoded_districts_chr, mean_risk_score, mode_risk_score, sep="; ")) # make a column for a label
 Uganda_master <- within(Uganda_master,  label2 <- paste(recoded_districts_chr, mode_risk_score, sep="; ")) # make a column for a label
 
-
 labels_to_remove <- c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule") # districts where no MDA has occured
 
 # remove these districts (make NA in label)
@@ -686,6 +685,9 @@ risk_map2 <-
   risk_map +
   ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
 
+
+#===================================================================#
+#   plot labels (only where TS studies occured at district-level)   #
 
 return(list(risk_map1, risk_map2))
 
@@ -760,11 +762,313 @@ plot_UGA_avg.risk.zones_func2 <- function(Uganda_dist, risk_overlay, risk_map){
     geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue", alpha = 0.8) + 
     ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
   
-  
   return(list(risk_map1, risk_map2))
 
 } 
 
+
+#====================================================================================================#
+#      Function: Plotting average risk scores on UGA map  - for plotting TS studies (district-level) #
+
+
+plot_UGA_avg.risk.zones_func3 <- function(Uganda_dist, risk_overlay, risk_map, PCC_survey_years, TS_data){
+  
+  # transform co-ordinates and test plot #
+  Uganda_dist_latlon <- sp::spTransform(Uganda_dist, CRS("+proj=longlat +datum=WGS84"))
+  plot(Uganda_dist_latlon, axes=TRUE)
+  points(x=31.76828, y=3.22909063, col = "red", pch=1, bg = "red")
+  
+  # to get centroids for each district #
+  Uganda_dist_centroids <- coordinates(sp::spTransform(Uganda_dist, CRS("+proj=longlat +datum=WGS84"))) # trasnform spatial obj to lat/lon data
+  
+  Uganda_dist_centroids_df <- as.data.frame(Uganda_dist_centroids)
+  
+  vector_dist <- as.character(Uganda_dist_latlon$DISTRICT) # make a vector of district names to supply a column with these
+  
+  Uganda_dist_centroids_df$district <- vector_dist # add this vector to the centroids dataframe
+  
+  Uganda_dist_centroids_df <- 
+    Uganda_dist_centroids_df %>% 
+    dplyr::rename(
+      lon = V1,
+      lat = V2
+    )
+  
+  Uganda_master <- cbind(Uganda_dist_centroids_df, risk_overlay)
+  
+  Uganda_master <- within(Uganda_master,  label <- paste(recoded_districts_chr, mean_risk_score, mode_risk_score, sep="; ")) # make a column for a label
+  Uganda_master <- within(Uganda_master,  label2 <- paste(recoded_districts_chr, mode_risk_score, sep="; ")) # make a column for a label
+  
+  Uganda_master2 <- Uganda_master
+  
+  labels_to_remove <- c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule") # districts where no MDA has occured
+  
+  # remove these districts (make NA in label)
+  Uganda_master$label[Uganda_master$recoded_districts %in% c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule")] <- NA
+  Uganda_master$label2[Uganda_master$recoded_districts %in% c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule")] <- NA
+  
+  #=============================================== #
+  #   plot labels on risk map                      #
+  
+  risk_map1 <- 
+    risk_map +
+    ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4, family = 'Avenir', segment.color = "#333333")
+  
+  risk_map2 <- 
+    risk_map +
+    ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+  
+  
+  #===================================================================#
+  #   plot labels (only where TS studies occured at district-level)   #
+  
+  
+  if(PCC_survey_years == "2002-2005"){
+    Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Lira", "Kamuli")] <- "plot"
+    Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
+  }
+  
+  # if(PCC_survey_years == "2006-2010"){
+  #   Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Masaka", "Lira", "Kibale",
+  #                                                                       "Kayunga", "Kamuli", "Kaberamaido",
+  #                                                                       "Busia", "Arua", "Apac")] <- "plot"
+  #   Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
+  # }
+  
+  if(PCC_survey_years == "2011-2015"){
+    Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Masaka", "Kamuli", "Mukono", "Soroti",
+                                                                        "Lira", "Moyo", "Kibale", "Kayunga", 
+                                                                        "Kaberamaido", "Busia", "Arua", "Apac")] <- "plot"
+    Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
+    
+    Uganda_master2$lat <- ifelse(Uganda_master2$recoded_districts == "Mukono", 0.180205, Uganda_master2$lat)
+  }
+  
+  if(PCC_survey_years == "2016-2020"){
+
+    Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Kumi", "Apac", "Kampala", "Kamuli",
+                                                                        "Katakwi", "Kayunga", "Lira", "Luwero",
+                                                                        "Masaka", "Mpigi", "Mubende", "Mukono",
+                                                                        "Nakasongola", "Pallisa", "Soroti", "Wakiso")] <- "plot"
+    Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
+    
+    Uganda_master2$lat <- ifelse(Uganda_master2$recoded_districts == "Mukono", 0.180205, Uganda_master2$lat)
+  }
+  
+  
+  
+  # now match centroid longitude & latitude data to TS prev data for each district
+  Uganda_dist_centroids_df$district <- str_to_title(Uganda_dist_centroids_df$district) # make district names in centroid data first letter capital case
+  
+  if(PCC_survey_years == "2002-2005"){
+  TS_data_subset <- subset(TS_data, Year < 2006) # subset studies before 2006 for this period
+  }
+  
+  if(PCC_survey_years == "2006-2010"){
+    TS_data_subset <- subset(TS_data, Year < 2011) # subset studies before 2012 for this period
+    TS_data_subset <- subset(TS_data_subset, Year > 2005) # after 2005
+  }
+  
+  if(PCC_survey_years == "2011-2015"){
+    TS_data_subset <- subset(TS_data, Year < 2016) # subset studies before 2012 for this period
+    TS_data_subset <- subset(TS_data_subset, Year > 2010) # after 2005
+  }
+  
+  if(PCC_survey_years == "2016-2020"){
+    TS_data_subset <- subset(TS_data, Year < 2020) # subset studies before 2012 for this period
+    TS_data_subset <- subset(TS_data_subset, Year > 2015) # after 2005
+  }
+  
+  to_match <- as.character(unique(TS_data_subset$District)) # character vector to match with districts in centroid data
+
+  Uganda_dist_centroids_df$district_to_select <- ifelse(Uganda_dist_centroids_df$district %in% to_match, "yes","no") # make column stating whether match in centroid data (i.e. yes have TS data for this district)
+  
+  Uganda_dist_centroids_df_subset <- subset(Uganda_dist_centroids_df, district_to_select == "yes") # subset centorid data on districts with TS data
+  
+  Uganda_dist_centroids_df_subset <- Uganda_dist_centroids_df_subset %>% 
+    rename(
+      District = district,
+    ) # rename so can use full join
+  
+  TS_data_coords_df <- dplyr::full_join(Uganda_dist_centroids_df_subset, TS_data_subset, by = "District") # join centroid + TS dataframes
+  
+  TS_data_coords_df$lat <- ifelse(TS_data_coords_df$District == "Mukono", 0.180205, TS_data_coords_df$lat)
+  
+  risk_map3 <- 
+    risk_map +
+    ggrepel::geom_text_repel(data = Uganda_master2, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+    geom_point(data = TS_data_coords_df, aes(x= lon, y = lat, size = Prevalence, shape = Type), fill = "yellow", colour = "black", alpha = 0.75)+
+    scale_size_continuous(name="PCC prevalence",
+                          breaks = c(5, 10, 15, 20, 30, 40, 50, 60, 90),
+                          limits = c(0,94))+
+    scale_shape_manual(name = "Adjusted or not",
+                       values=c(21,24))
+  
+  return(list(risk_map1, risk_map2, risk_map3, TS_data_coords_df))
+  
+} 
+
+
+#===========================================================================================================================#
+#      Function: Plotting average risk scores on UGA map - minus water bodies  - for plotting TS studies (district-level)   #
+
+
+plot_UGA_avg.risk.zones_func4 <- function(Uganda_dist, risk_overlay, risk_map, PCC_survey_years, TS_data){
+  
+  # transform co-ordinates and test plot #
+  Uganda_dist_latlon <- sp::spTransform(Uganda_dist, CRS("+proj=longlat +datum=WGS84"))
+  plot(Uganda_dist_latlon, axes=TRUE)
+  points(x=31.76828, y=3.22909063, col = "red", pch=1, bg = "red")
+  
+  # to get centroids for each district #
+  Uganda_dist_centroids <- coordinates(sp::spTransform(Uganda_dist, CRS("+proj=longlat +datum=WGS84"))) # trasnform spatial obj to lat/lon data
+  
+  Uganda_dist_centroids_df <- as.data.frame(Uganda_dist_centroids)
+  
+  vector_dist <- as.character(Uganda_dist_latlon$DISTRICT) # make a vector of district names to supply a column with these
+  
+  Uganda_dist_centroids_df$district <- vector_dist # add this vector to the centroids dataframe
+  
+  Uganda_dist_centroids_df <- 
+    Uganda_dist_centroids_df %>% 
+    dplyr::rename(
+      lon = V1,
+      lat = V2
+    )
+  
+  Uganda_master <- cbind(Uganda_dist_centroids_df, risk_overlay)
+  
+  Uganda_master <- within(Uganda_master,  label <- paste(recoded_districts_chr, mean_risk_score, mode_risk_score, sep="; ")) # make a column for a label
+  Uganda_master <- within(Uganda_master,  label2 <- paste(recoded_districts_chr, mode_risk_score, sep="; ")) # make a column for a label
+  
+  Uganda_master2 <- Uganda_master
+  
+  labels_to_remove <- c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule") # districts where no MDA has occured
+  
+  # remove these districts (make NA in label)
+  Uganda_master$label[Uganda_master$recoded_districts %in% c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule")] <- NA
+  Uganda_master$label2[Uganda_master$recoded_districts %in% c("Kampala","Kiboga","Kotido", "Kyenjojo", "Luweero", "Moroto","Ntungamo", "Sembabule")] <- NA
+  
+  # ==========================================================================#
+  # need to locate water bodies and remove co-ordinates from analysis for UGA #
+  
+  URL <- "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/physical/ne_50m_lakes.zip"
+  
+  fil <- basename(URL)
+  if (!file.exists(fil)) download.file(URL, fil)
+  fils <- unzip(fil)
+  lakes <- readOGR(grep("shp$", fils, value=TRUE), "ne_50m_lakes",
+                   stringsAsFactors=FALSE, verbose=FALSE)
+  
+  lakes_sf <- sf::st_as_sf(lakes) # make sf spatial object for joining
+  
+  # for plotting the lakes # 
+  lakes_UGA <- lakes_sf %>% dplyr::select(name, name_en)
+  
+  lakes_UGA <- lakes_UGA %>% filter(name %in% c("Lake Victoria", "Lake Albert","Lake Kyoga","Lake Edward"))
+  #=============================================== #
+  #   plot labels on risk map                      #
+  
+  risk_map1 <- 
+    risk_map +
+    geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue", alpha = 0.8) + 
+    ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label), box.padding = 1.15, max.overlaps = Inf, size = 4, family = 'Avenir', segment.color = "#333333")
+  
+  risk_map2 <- 
+    risk_map +
+    geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue", alpha = 0.8) + 
+    ggrepel::geom_text_repel(data = Uganda_master, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")
+  
+  #===================================================================#
+  #   plot labels (only where TS studies occured at district-level)   #
+  
+  
+  if(PCC_survey_years == "2002-2005"){
+    Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Lira", "Kamuli")] <- "plot"
+    Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
+  }
+  
+  # if(PCC_survey_years == "2006-2010"){
+  #   Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Masaka", "Lira", "Kibale",
+  #                                                                       "Kayunga", "Kamuli", "Kaberamaido",
+  #                                                                       "Busia", "Arua", "Apac")] <- "plot"
+  #   Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
+  # }
+  
+  if(PCC_survey_years == "2011-2015"){
+    Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Masaka", "Kamuli", "Mukono", "Soroti",
+                                                                        "Lira", "Moyo", "Kibale", "Kayunga", 
+                                                                        "Kaberamaido", "Busia", "Arua", "Apac")] <- "plot"
+    Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
+    
+    Uganda_master2$lat <- ifelse(Uganda_master2$recoded_districts == "Mukono", 0.180205, Uganda_master2$lat)
+  }
+  
+  if(PCC_survey_years == "2016-2020"){
+    
+    Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Kumi", "Apac", "Kampala", "Kamuli",
+                                                                        "Katakwi", "Kayunga", "Lira", "Luwero",
+                                                                        "Masaka", "Mpigi", "Mubende", "Mukono",
+                                                                        "Nakasongola", "Pallisa", "Soroti", "Wakiso")] <- "plot"
+    Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
+    
+    Uganda_master2$lat <- ifelse(Uganda_master2$recoded_districts == "Mukono", 0.180205, Uganda_master2$lat)
+  }
+  
+  
+  
+  # now match centroid longitude & latitude data to TS prev data for each district
+  Uganda_dist_centroids_df$district <- str_to_title(Uganda_dist_centroids_df$district) # make district names in centroid data first letter capital case
+  
+  if(PCC_survey_years == "2002-2005"){
+    TS_data_subset <- subset(TS_data, Year < 2006) # subset studies before 2006 for this period
+  }
+  
+  if(PCC_survey_years == "2006-2010"){
+    TS_data_subset <- subset(TS_data, Year < 2011) # subset studies before 2012 for this period
+    TS_data_subset <- subset(TS_data_subset, Year > 2005) # after 2005
+  }
+  
+  if(PCC_survey_years == "2011-2015"){
+    TS_data_subset <- subset(TS_data, Year < 2016) # subset studies before 2012 for this period
+    TS_data_subset <- subset(TS_data_subset, Year > 2010) # after 2005
+  }
+  
+  if(PCC_survey_years == "2016-2020"){
+    TS_data_subset <- subset(TS_data, Year < 2020) # subset studies before 2012 for this period
+    TS_data_subset <- subset(TS_data_subset, Year > 2015) # after 2005
+  }
+  
+  to_match <- as.character(unique(TS_data_subset$District)) # character vector to match with districts in centroid data
+  
+  Uganda_dist_centroids_df$district_to_select <- ifelse(Uganda_dist_centroids_df$district %in% to_match, "yes","no") # make column stating whether match in centroid data (i.e. yes have TS data for this district)
+  
+  Uganda_dist_centroids_df_subset <- subset(Uganda_dist_centroids_df, district_to_select == "yes") # subset centorid data on districts with TS data
+  
+  Uganda_dist_centroids_df_subset <- Uganda_dist_centroids_df_subset %>% 
+    rename(
+      District = district,
+    ) # rename so can use full join
+  
+  TS_data_coords_df <- dplyr::full_join(Uganda_dist_centroids_df_subset, TS_data_subset, by = "District") # join centroid + TS dataframes
+  
+  TS_data_coords_df$lat <- ifelse(TS_data_coords_df$District == "Mukono", 0.180205, TS_data_coords_df$lat)
+  
+  risk_map3 <- 
+    risk_map +
+    geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue", alpha = 0.8) +
+    ggrepel::geom_text_repel(data = Uganda_master2, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+    geom_point(data = TS_data_coords_df, aes(x= lon, y = lat, size = Prevalence, shape = Type), fill = "yellow", colour = "black", alpha = 0.75)+
+    scale_size_continuous(name="PCC prevalence",
+                          breaks = c(5, 10, 15, 20, 30, 40, 50, 60, 90),
+                          limits = c(0,94))+
+    scale_shape_manual(name = "Adjusted or not",
+                       values=c(21,24))
+  
+  return(list(risk_map1, risk_map2, risk_map3, TS_data_coords_df))
+  
+  
+} 
 
 #=========================================================================================================#
 #    function to i) overlay sub-district locations of MDAs & 

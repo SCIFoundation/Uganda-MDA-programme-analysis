@@ -291,83 +291,105 @@ plot(avg.risk.map.water_2016[[2]]) # therefore onl
 #=====================================================================================================================================#
 #                                    Mapping TS studies (district-level) with avg. risk                                               #
 # ====================================================================================================================================#
-source('Mapping_coverage.R')
 
+# TS studies (district-level) on risk maps (minus water bodies)
+TS_distlvlstudies_rismap_0205 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uganda_dist, 
+                                                  risk_overlay = Avg.risk_originaldistr_2001, 
+                                                  risk_map = overlay_2001[[2]],
+                                                  PCC_survey_years = "2002-2005",
+                                                  TS_data = UGA_MDA_PCCprev_data)
+TS_distlvlstudies_rismap_0205[[3]]
 
-# just need a vector of districts to map (with TS studies) for each of 2002-2005, 2006-2011 etc --> then subset the labels above 
-# modify plot_UGA_avg.risk.zones_func in Risk_factor_plotting_funcs --> add risk_map3 with PCC stuy districts only to plot
-# include TS data on this new risk_map3 plot
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # A) for 2001 to 2012 data
-# UGA_subcounty_object_2004_2012 <- UGA_subcounties_boundaries_function(subcounty_shape_file = subcounties_2010, 
-#                                                                       district_map = districts_2001, national_map_input = national_map)
+# TS_distlvlstudies_rismap_0610 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uganda_dist, 
+#                                                         risk_overlay = Avg.risk_originaldistr_2001, 
+#                                                         risk_map = overlay_2006[[2]],
+#                                                         PCC_survey_years = "2006-2010",
+#                                                         TS_data = UGA_MDA_PCCprev_data)
 # 
-# UGA_subcounty_object_2004_2012[[1]]
-# 
-# # extract district names #
-# district_names_20062010_object <- subcounty_name0412_func(shape_file = UGA_subcounty_object_2004_2012[[2]]) 
-# 
-# 
-# district_2006_names <- district_names_20062010_object[[1]] # for 2003 - 2009 sub-counties 
-# 
-# district_2010_names <- district_names_20062010_object[[2]] # for 2010 sub-counties onwards
-# 
-# # B) for 2013-2019 data
-# UGA_subcounty_object_2019 <- UGA_subcounties_boundaries_function(subcounty_shape_file = subcounties_2019, 
-#                                                                  district_map = districts_2001, national_map_input = national_map)
-# 
-# UGA_subcounty_object_2019[[1]]
-# 
-# # extract district names for 2013-2019 #
-# district_names_2019_object <- subcounty_name19_func(shape_file = UGA_subcounty_object_2019[[2]]) 
-# 
-# 
-# district_2019_names <- district_names_2019_object[[1]] # for 2003 - 2009 sub-counties 
-# 
-# #=====================================================================================================#
-# # Extract districts with PCC studies to i) work out average risk & ii) plot over PCC risk factors     #
-# #=====================================================================================================#
-# 
-# # for 2002-2005 PCC studies #
-# Dist_names_0205 <- districts_name_func3(shape_file = subcounties_2010, year = "2002-2005") 
-# 
-# district_PCCstudies_object_0205 <- district_PCCstudies_processing_plotting_func(dist_names = district_2006_names,
-#                                                                                 district_2001 = district_2001, national_map_input = national_map, 
-#                                                                                 PCC_survey_years = "2002-2005")
-# 
-# district_PCCstudies_object_0205[[2]]
+# TS_distlvlstudies_rismap_0610[[3]]
+
+TS_distlvlstudies_rismap_1115 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uganda_dist, 
+                                                               risk_overlay = Avg.risk_originaldistr_2001, 
+                                                               risk_map = overlay_2011[[2]],
+                                                               PCC_survey_years = "2011-2015",
+                                                               TS_data = UGA_MDA_PCCprev_data)
+TS_distlvlstudies_rismap_1115[[3]]
+
+TS_distlvlstudies_rismap_1620 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uganda_dist, 
+                                                               risk_overlay = Avg.risk_originaldistr_2001, 
+                                                               risk_map = overlay_2016[[2]],
+                                                               PCC_survey_years = "2016-2020",
+                                                               TS_data = UGA_MDA_PCCprev_data)
+
+
+TS_distlvlstudies_rismap_1620[[3]]
+
+
+
+# TS studies (district-level) on risk maps (with water bodies)
+TS_distlvlstudies_rismap_nowater0205 <- plot_UGA_avg.risk.zones_func4(Uganda_dist = Uganda_dist, 
+                                                                      risk_overlay = Avg.risk_originaldistr_nowater_2001, 
+                                                                      risk_map = overlay_2001[[2]],
+                                                                      PCC_survey_years = "2002-2005",
+                                                                      TS_data = UGA_MDA_PCCprev_data)
+
+TS_distlvlstudies_rismap_nowater0205[[3]]
+
+
+
+TS_distlvlstudies_rismap_nowater1115 <- plot_UGA_avg.risk.zones_func4(Uganda_dist = Uganda_dist, 
+                                                                      risk_overlay = Avg.risk_originaldistr_nowater_2001, 
+                                                                      risk_map = overlay_2011[[2]],
+                                                                      PCC_survey_years = "2011-2015",
+                                                                      TS_data = UGA_MDA_PCCprev_data)
+
+TS_distlvlstudies_rismap_nowater1115[[3]]
+
+
+TS_distlvlstudies_rismap_nowater1620 <- plot_UGA_avg.risk.zones_func4(Uganda_dist = Uganda_dist, 
+                                                                      risk_overlay = Avg.risk_originaldistr_nowater_2001, 
+                                                                      risk_map = overlay_2016[[2]],
+                                                                      PCC_survey_years = "2016-2020",
+                                                                      TS_data = UGA_MDA_PCCprev_data)
+
+TS_distlvlstudies_rismap_nowater1620[[3]]
 
 
 
 
 
+# below is working-out code #
+# TO DO: need to figure way of scattering prev data points when more than 1 data point per district
 
+plot(TS_studies_rismap_0205[[3]]) # mean risk scores not useful
+test <- TS_distlvlstudies_rismap_1115[[4]]
+
+test$lat <- ifelse(test$District == "Mukono", 0.180205, test$lat)
+
+test$district <- str_to_title(test$district)
+
+test_TSdat <- UGA_MDA_PCCprev_data
+test_TSdat_subset <- subset(test_TSdat, Year < 2012)
+test_TSdat_subset <- subset(test_TSdat_subset, Year > 2005)
+
+to_match <- as.character(unique(test_TSdat$District))
+
+#to_match <- c("Lira","Kamuli")
+
+test$district_to_select <- ifelse(test$district %in% to_match, "yes","no")
+
+test_subset <- subset(test, district_to_select == "yes")
+
+test_subset <- test_subset %>% 
+  rename(
+    District = district,
+)
+
+test2 <- dplyr::full_join(test_subset, test_TSdat, by = "District")
+
+# centroids_extract <- to_match %in% test$district
+# 
+# centroids_extract <- match(test$district,test_TSdat$District)
 
 # #===================================================================================================================================#
 # #                                               Mapping sub-district MDA locations                                                  #
