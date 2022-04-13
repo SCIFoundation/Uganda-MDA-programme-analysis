@@ -2392,7 +2392,7 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
     PCCstudy_subcounties <-
       c("BUTANSI", "KITAYUNJWA", "NAMWENDWA", "BUGULUMBYA", "KABONERA", "KATWE-BUTEGO DIVISION",
         "KIMAANYA-KYABAKUZA DIVISION", "KKINGO", "KYANAMUKAAKA", "NYENDO-SSENYANGE DIVISION",
-        "KYAMPISI", "NTENJERU") # there is no Mukono TC sub-county
+        "KYAMPISI", "NTENJERU", "ARAPAI") # there is no Mukono TC sub-county
     
     sc_names # copy variable (dist names) : UGA_dist_MDA_names <- district_names 
     
@@ -2473,7 +2473,7 @@ subcounty_PCCstudies_processing_plotting_func <- function(sc_names, UGA_subcount
   if (PCC_survey_year == 2013){
     
     PCC_survey_districts <-
-      c("LWENGO", "MUKONO", "MASAKA", "KAMULI")
+      c("LWENGO", "MUKONO", "MASAKA", "KAMULI","SOROTI")
   } 
   
   if (PCC_survey_year == 2015){

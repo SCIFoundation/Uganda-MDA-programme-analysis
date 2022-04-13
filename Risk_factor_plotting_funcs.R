@@ -92,8 +92,8 @@ plotting_overlays_func <- function(risk_factor1, risk_factor2, risk_factor3, adm
           axis.text = element_blank(), 
           axis.ticks = element_blank(),
           panel.background = element_blank()) +
-    cowplot::panel_border(remove = TRUE) +
-    annotate("text", label = year, x = 29.75, y = 3.8, size = 7, colour = "black")
+    cowplot::panel_border(remove = TRUE)
+    #annotate("text", label = year, x = 29.75, y = 3.8, size = 7, colour = "black")
   
   return(list(a, b, riskfact_df))
   
@@ -913,7 +913,7 @@ plot_UGA_avg.risk.zones_func3 <- function(Uganda_dist, risk_overlay, risk_map, P
 #      Function: Plotting average risk scores on UGA map - minus water bodies  - for plotting TS studies (district-level)   #
 
 
-plot_UGA_avg.risk.zones_func4 <- function(Uganda_dist, risk_overlay, risk_map, PCC_survey_years, TS_data){
+plot_UGA_avg.risk.zones_func4 <- function(Uganda_dist, risk_overlay, risk_map, PCC_survey_years, TS_data, UGA_map){
   
   # transform co-ordinates and test plot #
   Uganda_dist_latlon <- sp::spTransform(Uganda_dist, CRS("+proj=longlat +datum=WGS84"))
@@ -935,6 +935,8 @@ plot_UGA_avg.risk.zones_func4 <- function(Uganda_dist, risk_overlay, risk_map, P
       lon = V1,
       lat = V2
     )
+  
+  Uganda_dist_centroids_all <- Uganda_dist_centroids_df
   
   Uganda_master <- cbind(Uganda_dist_centroids_df, risk_overlay)
   
@@ -998,7 +1000,7 @@ plot_UGA_avg.risk.zones_func4 <- function(Uganda_dist, risk_overlay, risk_map, P
   if(PCC_survey_years == "2011-2015"){
     Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Masaka", "Kamuli", "Mukono", "Soroti",
                                                                         "Lira", "Moyo", "Kibale", "Kayunga", 
-                                                                        "Kaberamaido", "Busia", "Arua", "Apac")] <- "plot"
+                                                                        "Kaberamaido", "Busia", "Arua", "Apac", "Soroti")] <- "plot"
     Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
     
     Uganda_master2$lat <- ifelse(Uganda_master2$recoded_districts == "Mukono", 0.180205, Uganda_master2$lat)
@@ -1007,9 +1009,10 @@ plot_UGA_avg.risk.zones_func4 <- function(Uganda_dist, risk_overlay, risk_map, P
   if(PCC_survey_years == "2016-2020"){
     
     Uganda_master2$dist_to_plot[Uganda_master2$recoded_districts %in% c("Kumi", "Apac", "Kampala", "Kamuli",
-                                                                        "Katakwi", "Kayunga", "Lira", "Luwero",
+                                                                        "Katakwi", "Kayunga", "Lira", "Luweero",
                                                                         "Masaka", "Mpigi", "Mubende", "Mukono",
-                                                                        "Nakasongola", "Pallisa", "Soroti", "Wakiso")] <- "plot"
+                                                                        "Nakasongola", "Pallisa", "Soroti", "Wakiso",
+                                                                        "Gulu")] <- "plot"
     Uganda_master2 <- subset(Uganda_master2, dist_to_plot == "plot")
     
     Uganda_master2$lat <- ifelse(Uganda_master2$recoded_districts == "Mukono", 0.180205, Uganda_master2$lat)
@@ -1039,7 +1042,7 @@ plot_UGA_avg.risk.zones_func4 <- function(Uganda_dist, risk_overlay, risk_map, P
     TS_data_subset <- subset(TS_data_subset, Year > 2015) # after 2005
   }
   
-  to_match <- as.character(unique(TS_data_subset$District)) # character vector to match with districts in centroid data
+  to_match <- as.character(unique(TS_data_subset$Old_districts)) # character vector to match with districts in centroid data
   
   Uganda_dist_centroids_df$district_to_select <- ifelse(Uganda_dist_centroids_df$district %in% to_match, "yes","no") # make column stating whether match in centroid data (i.e. yes have TS data for this district)
   
@@ -1052,20 +1055,46 @@ plot_UGA_avg.risk.zones_func4 <- function(Uganda_dist, risk_overlay, risk_map, P
   
   TS_data_coords_df <- dplyr::full_join(Uganda_dist_centroids_df_subset, TS_data_subset, by = "District") # join centroid + TS dataframes
   
-  TS_data_coords_df$lat <- ifelse(TS_data_coords_df$District == "Mukono", 0.180205, TS_data_coords_df$lat)
+  TS_data_coords_df$lat <- ifelse(TS_data_coords_df$District == "Mukono", 0.243376, TS_data_coords_df$lat)
   
   risk_map3 <- 
     risk_map +
     geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue", alpha = 0.8) +
     ggrepel::geom_text_repel(data = Uganda_master2, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
-    geom_point(data = TS_data_coords_df, aes(x= lon, y = lat, size = Prevalence, shape = Type), fill = "yellow", colour = "black", alpha = 0.75)+
+    geom_point(data = TS_data_coords_df, aes(x= lon, y = lat, size = Prevalence, shape = Type), 
+               fill = "yellow", colour = "black", alpha = 0.75, position = position_jitter(h=0.1,w=0.11))+
     scale_size_continuous(name="PCC prevalence",
-                          breaks = c(5, 10, 15, 20, 30, 40, 50, 60, 90),
-                          limits = c(0,94))+
+                          breaks = c(0, 5, 10, 15, 20, 30, 40, 50, 60, 90),
+                          limits = c(0,94),
+                          range = c(1.75,6))+
     scale_shape_manual(name = "Adjusted or not",
-                       values=c(21,24))
+                       values=c(21,24,25))
   
-  return(list(risk_map1, risk_map2, risk_map3, TS_data_coords_df))
+  #========================================================#
+  #  Geographic outline of Uganda - to capture isalnds etc #
+  # https://maps.princeton.edu/catalog/stanford-fh022bz4757 
+  UGAmap <- fortify(UGA_map)
+  
+  risk_map4 <- 
+    risk_map +
+    #geom_sf(data = lakes_UGA, colour = alpha("blue",0.8), fill = "blue", alpha = 0.8) +
+    geom_polygon(data = UGAmap, aes(x = long, y = lat, group = group), colour="blue", fill="blue", alpha=0.2)+
+    ggrepel::geom_text_repel(data = Uganda_master2, aes(lon, lat, label = label2), box.padding = 1.15, max.overlaps = Inf, size = 4.5, family = 'Avenir', segment.color = "#333333", fontface = "bold")+
+    geom_point(data = TS_data_coords_df, aes(x= lon1, y = lat1, size = Prevalence, shape = Type, colour = SC_risk, stroke = stroke), 
+               fill = "yellow", alpha = 0.75)+
+    scale_size_continuous(name="PCC prevalence",
+                          breaks = c(0, 5, 10, 15, 20, 30, 40, 50, 60, 90),
+                          limits = c(0,94),
+                          range = c(1.75,6))+
+    scale_shape_manual(name = "Adjusted or not",
+                       values=c(21,24,25), na.translate = F)+
+    scale_color_manual(name = "District-level prevalence or sub-county
+available (colour and thickness around point)",
+                       values = c("black","red4"), na.translate = F)
+  #coord_sf(xlim=c(29.2,35.05),ylim=c(-1.5439,4.3), expand = FALSE)
+  
+  
+  return(list(risk_map1, risk_map2, risk_map3, risk_map4, TS_data_coords_df, Uganda_dist_centroids_all))
   
   
 } 

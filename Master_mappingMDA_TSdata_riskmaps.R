@@ -15,8 +15,8 @@ source('Plotting_UGA_MDA_TSdata.R')
 #=============================================#
 
 # 1) data for TS data x year when MDA first started
-UGA_MDA_PCCprev_data <- read.csv("~/Uganda-MDA-programme-analysis/Data/PCC_prev_MDAyr_data.csv") 
-View(UGA_MDA_PCCprev_data)
+UGA_MDA_PCCprev_data <- read.csv("~/Uganda-MDA-programme-analysis/Data/PCC_prev_MDAyr_data2.csv") 
+view(UGA_MDA_PCCprev_data)
 
 # 2) risk factor data: these maps and spatial files have been generated through another R project:
 # https://github.com/SCIFoundation/Uganda_porcine_cysticercosis_risk_mapping
@@ -41,6 +41,7 @@ load("~/Uganda-MDA-programme-analysis/Data/poverty_lowest40_2006.rdata") # 2011 
 load("~/Uganda-MDA-programme-analysis/Data/sanitation2016.rdata") # 2011 sanitation distribution spatial file
 load("~/Uganda-MDA-programme-analysis/Data/poverty_lowest40_2016.rdata") # 2011 poverty distribution spatial file
 
+UGA_water <- readShapePoly('~/Uganda-MDA-programme-analysis/Data/Uganda shape files/water bodies/fh022bz4757.shp')
 
 # sub-district MDA mapping (add in each time)
 
@@ -299,6 +300,7 @@ TS_distlvlstudies_rismap_0205 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uga
                                                   PCC_survey_years = "2002-2005",
                                                   TS_data = UGA_MDA_PCCprev_data)
 TS_distlvlstudies_rismap_0205[[3]]
+TS_distlvlstudies_rismap_0205[[4]]
 
 # TS_distlvlstudies_rismap_0610 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uganda_dist, 
 #                                                         risk_overlay = Avg.risk_originaldistr_2001, 
@@ -325,71 +327,36 @@ TS_distlvlstudies_rismap_1620 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uga
 TS_distlvlstudies_rismap_1620[[3]]
 
 
-
-# TS studies (district-level) on risk maps (with water bodies)
+# ============================================================ #
+# TS studies (district-level) on risk maps (with water bodies) #
 TS_distlvlstudies_rismap_nowater0205 <- plot_UGA_avg.risk.zones_func4(Uganda_dist = Uganda_dist, 
                                                                       risk_overlay = Avg.risk_originaldistr_nowater_2001, 
                                                                       risk_map = overlay_2001[[2]],
                                                                       PCC_survey_years = "2002-2005",
-                                                                      TS_data = UGA_MDA_PCCprev_data)
+                                                                      TS_data = UGA_MDA_PCCprev_data, UGA_map = UGA_water)
 
 TS_distlvlstudies_rismap_nowater0205[[3]]
-
+TS_distlvlstudies_rismap_nowater0205[[4]] # final map to call with 
 
 
 TS_distlvlstudies_rismap_nowater1115 <- plot_UGA_avg.risk.zones_func4(Uganda_dist = Uganda_dist, 
                                                                       risk_overlay = Avg.risk_originaldistr_nowater_2001, 
                                                                       risk_map = overlay_2011[[2]],
                                                                       PCC_survey_years = "2011-2015",
-                                                                      TS_data = UGA_MDA_PCCprev_data)
+                                                                      TS_data = UGA_MDA_PCCprev_data, UGA_map = UGA_water)
 
 TS_distlvlstudies_rismap_nowater1115[[3]]
-
+TS_distlvlstudies_rismap_nowater1115[[4]]
 
 TS_distlvlstudies_rismap_nowater1620 <- plot_UGA_avg.risk.zones_func4(Uganda_dist = Uganda_dist, 
                                                                       risk_overlay = Avg.risk_originaldistr_nowater_2001, 
                                                                       risk_map = overlay_2016[[2]],
                                                                       PCC_survey_years = "2016-2020",
-                                                                      TS_data = UGA_MDA_PCCprev_data)
+                                                                      TS_data = UGA_MDA_PCCprev_data, UGA_map = UGA_water)
 
 TS_distlvlstudies_rismap_nowater1620[[3]]
+TS_distlvlstudies_rismap_nowater1620[[4]]
 
-
-
-
-
-# below is working-out code #
-# TO DO: need to figure way of scattering prev data points when more than 1 data point per district
-
-plot(TS_studies_rismap_0205[[3]]) # mean risk scores not useful
-test <- TS_distlvlstudies_rismap_1115[[4]]
-
-test$lat <- ifelse(test$District == "Mukono", 0.180205, test$lat)
-
-test$district <- str_to_title(test$district)
-
-test_TSdat <- UGA_MDA_PCCprev_data
-test_TSdat_subset <- subset(test_TSdat, Year < 2012)
-test_TSdat_subset <- subset(test_TSdat_subset, Year > 2005)
-
-to_match <- as.character(unique(test_TSdat$District))
-
-#to_match <- c("Lira","Kamuli")
-
-test$district_to_select <- ifelse(test$district %in% to_match, "yes","no")
-
-test_subset <- subset(test, district_to_select == "yes")
-
-test_subset <- test_subset %>% 
-  rename(
-    District = district,
-)
-
-test2 <- dplyr::full_join(test_subset, test_TSdat, by = "District")
-
-# centroids_extract <- to_match %in% test$district
-# 
-# centroids_extract <- match(test$district,test_TSdat$District)
 
 # #===================================================================================================================================#
 # #                                               Mapping sub-district MDA locations                                                  #
