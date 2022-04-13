@@ -311,14 +311,14 @@ TS_distlvlstudies_rismap_0205[[4]]
 # TS_distlvlstudies_rismap_0610[[3]]
 
 TS_distlvlstudies_rismap_1115 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uganda_dist, 
-                                                               risk_overlay = Avg.risk_originaldistr_2001, 
+                                                               risk_overlay = Avg.risk_originaldistr_2011, 
                                                                risk_map = overlay_2011[[2]],
                                                                PCC_survey_years = "2011-2015",
                                                                TS_data = UGA_MDA_PCCprev_data)
 TS_distlvlstudies_rismap_1115[[3]]
 
 TS_distlvlstudies_rismap_1620 <- plot_UGA_avg.risk.zones_func3(Uganda_dist = Uganda_dist, 
-                                                               risk_overlay = Avg.risk_originaldistr_2001, 
+                                                               risk_overlay = Avg.risk_originaldistr_2016, 
                                                                risk_map = overlay_2016[[2]],
                                                                PCC_survey_years = "2016-2020",
                                                                TS_data = UGA_MDA_PCCprev_data)
@@ -340,7 +340,7 @@ TS_distlvlstudies_rismap_nowater0205[[4]] # final map to call with
 
 
 TS_distlvlstudies_rismap_nowater1115 <- plot_UGA_avg.risk.zones_func4(Uganda_dist = Uganda_dist, 
-                                                                      risk_overlay = Avg.risk_originaldistr_nowater_2001, 
+                                                                      risk_overlay = Avg.risk_originaldistr_nowater_2011, 
                                                                       risk_map = overlay_2011[[2]],
                                                                       PCC_survey_years = "2011-2015",
                                                                       TS_data = UGA_MDA_PCCprev_data, UGA_map = UGA_water)
@@ -349,7 +349,7 @@ TS_distlvlstudies_rismap_nowater1115[[3]]
 TS_distlvlstudies_rismap_nowater1115[[4]]
 
 TS_distlvlstudies_rismap_nowater1620 <- plot_UGA_avg.risk.zones_func4(Uganda_dist = Uganda_dist, 
-                                                                      risk_overlay = Avg.risk_originaldistr_nowater_2001, 
+                                                                      risk_overlay = Avg.risk_originaldistr_nowater_2016, 
                                                                       risk_map = overlay_2016[[2]],
                                                                       PCC_survey_years = "2016-2020",
                                                                       TS_data = UGA_MDA_PCCprev_data, UGA_map = UGA_water)
