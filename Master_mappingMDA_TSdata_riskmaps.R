@@ -52,7 +52,10 @@ UGA_water <- readShapePoly('~/Uganda-MDA-programme-analysis/Data/Uganda shape fi
 Output <- Processing_plotting_UGA_MDA_TSdata_func(data = UGA_MDA_PCCprev_data)
 
 Output[[1]]
+Output[[2]]
+Output[[3]] # to use for visual validation vs. MDA simulations
 
+View(Output[[4]])
 #==========================================================#
 # 2)      Plot risk factor maps x 2002 disticts            #
 

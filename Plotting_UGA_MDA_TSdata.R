@@ -129,6 +129,91 @@ pFinal <- p20 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=1
 
 pFinal
 
-return(list(pFinal, UGA_MDA_PCCprev_data))
+# plot PCC data by original districts 
+p_old <- ggplot(data = UGA_MDA_PCCprev_data, aes(group = Type))+
+  #geom_rect(subset(UGA_MDA_PCCprev_data, District="Apac"), aes(x = NULL, y=NULL, xmin=2000, xmax=2003, ymin=0, ymax=100), alpha=0.1, fill = "blue")+
+  geom_point(aes(x = Year_offset, y = Prevalence, colour = District, shape = SC_risk))+
+  geom_errorbar(aes(x = Year_offset, y = Prevalence, linetype = Type, ymin= Lower, ymax = Upper, colour = District), 
+                width= 1.25)+
+  scale_x_continuous(limits=c(2000,2020))+
+  scale_y_continuous(limits=c(0,100))+
+  facet_wrap(~Old_districts, scales = "free")+
+  #annotate("rect", xmin=2000, xmax=2003, ymin=0, ymax=100, fill="blue", alpha = .1)+
+  theme_bw()+
+  theme(axis.line=element_line())+
+  labs(linetype='')+
+  xlab("Year") + 
+  ylab("Porcine cysticercosis prevalence")
+
+
+p_old1 <- p_old + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Apac", Type = NA), 
+                      aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old2 <- p_old1 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Arua", Type = NA), 
+                     aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old3 <- p_old2 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Busia", Type = NA), 
+                      aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old4 <- p_old3 + geom_rect(data = data.frame(xmin=2000, xmax=2009, ymin=0, ymax=100, Old_districts = "Gulu", Type = NA), 
+                       aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old4a <- p_old4 + geom_rect(data = data.frame(xmin=2000, xmax=2005, ymin=0, ymax=100, Old_districts = "Kaberamaido", Type = NA), 
+                      aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old5 <- p_old4a + geom_rect(data = data.frame(xmin=2000, xmax=2020, ymin=0, ymax=100, Old_districts = "Kampala", Type = NA), 
+                     aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old6 <- p_old5 + geom_rect(data = data.frame(xmin=2000, xmax=2005, ymin=0, ymax=100, Old_districts = "Kamuli", Type = NA), 
+                     aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old7 <- p_old6 + geom_rect(data = data.frame(xmin=2000, xmax=2013, ymin=0, ymax=100, Old_districts = "Katakwi", Type = NA), 
+                     aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old8 <- p_old7 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Kayunga", Type = NA), 
+                     aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old9 <- p_old8 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Kibale", Type = NA), 
+                     aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old10 <- p_old9 + geom_rect(data = data.frame(xmin=2000, xmax=2013, ymin=0, ymax=100, Old_districts = "Kumi", Type = NA), 
+                      aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old11 <- p_old10 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Lira", Type = NA), 
+                       aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old11a <- p_old11 + geom_rect(data = data.frame(xmin=2000, xmax=2020, ymin=0, ymax=100, Old_districts = "Luwero", Type = NA), 
+                               aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old12 <- p_old11a + geom_rect(data = data.frame(xmin=2000, xmax=2007, ymin=0, ymax=100, Old_districts = "Masaka", Type = NA), 
+                       aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old13 <- p_old12 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Moyo", Type = NA), 
+                        aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old14 <- p_old13 + geom_rect(data = data.frame(xmin=2000, xmax=2007, ymin=0, ymax=100, Old_districts = "Mpigi", Type = NA), 
+                       aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old15 <- p_old14 + geom_rect(data = data.frame(xmin=2000, xmax=2009, ymin=0, ymax=100, Old_districts = "Mubende", Type = NA), 
+                       aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old16 <- p_old15 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Mukono", Type = NA), 
+                       aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old17 <- p_old16 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Nakasongola", Type = NA), 
+                        aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old18 <- p_old17 + geom_rect(data = data.frame(xmin=2000, xmax=2009, ymin=0, ymax=100, Old_districts = "Pallisa", Type = NA), 
+                       aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_old19 <- p_old18 + geom_rect(data = data.frame(xmin=2000, xmax=2005, ymin=0, ymax=100, Old_districts = "Soroti", Type = NA), 
+                       aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+p_oldFinal <- p_old19 + geom_rect(data = data.frame(xmin=2000, xmax=2003, ymin=0, ymax=100, Old_districts = "Wakiso", Type = NA), 
+                          aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, group = Type), alpha=0.1, fill = "blue")
+
+#p_oldFinal
+
+return(list(pFinal, p_old, p_oldFinal, UGA_MDA_PCCprev_data))
 
 }
